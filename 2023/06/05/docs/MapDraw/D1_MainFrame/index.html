@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="程序主框架[TOC] 使用EasyX可以在控制台程序中显示图像、绘制图形，让程序变得更为美观。基于此，可以把程序界面设置为控制按钮+图形显示的形式。 内容简介 使用EasyX加载程序界面 监听鼠标消息 根据鼠标位置判断被点击的控件-  1. 主界面 程序演示视频链接 MapDraw_Introduction      主界面由两张图片构成，左侧的工具栏为图片，右侧为加载的底图。  示例代码为：12">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Hexo">
+<meta property="og:url" content="http://example.com/2023/06/05/docs/MapDraw/D1_MainFrame/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="程序主框架[TOC] 使用EasyX可以在控制台程序中显示图像、绘制图形，让程序变得更为美观。基于此，可以把程序界面设置为控制按钮+图形显示的形式。 内容简介 使用EasyX加载程序界面 监听鼠标消息 根据鼠标位置判断被点击的控件-  1. 主界面 程序演示视频链接 MapDraw_Introduction      主界面由两张图片构成，左侧的工具栏为图片，右侧为加载的底图。  示例代码为：12">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://i.loli.net/2021/06/07/scvMPXYfK7Eo9JO.png">
+<meta property="article:published_time" content="2023-06-05T15:25:53.660Z">
+<meta property="article:modified_time" content="2022-02-22T04:10:24.200Z">
+<meta property="article:author" content="John Doe">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2021/06/07/scvMPXYfK7Eo9JO.png">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/typeface-source-code-pro@0.0.71/index.min.css">
+
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+  
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"><span class="fa fa-bars"></span></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+        
+          <a class="nav-icon" href="/atom.xml" title="RSS Feed"><span class="fa fa-rss"></span></a>
+        
+        <a class="nav-icon nav-search-btn" title="Search"><span class="fa fa-search"></span></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://example.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-docs/MapDraw/D1_MainFrame" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2023/06/05/docs/MapDraw/D1_MainFrame/" class="article-date">
+  <time class="dt-published" datetime="2023-06-05T15:25:53.660Z" itemprop="datePublished">2023-06-05</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h1 id="程序主框架"><a href="#程序主框架" class="headerlink" title="程序主框架"></a>程序主框架</h1><p>[TOC]</p>
+<p>使用EasyX可以在控制台程序中显示图像、绘制图形，让程序变得更为美观。基于此，可以把程序界面设置为控制按钮+图形显示的形式。</p>
+<h2 id="内容简介"><a href="#内容简介" class="headerlink" title="内容简介"></a>内容简介</h2><ul>
+<li>使用EasyX加载程序界面</li>
+<li>监听鼠标消息</li>
+<li>根据鼠标位置判断被点击的控件-</li>
+</ul>
+<h2 id="1-主界面"><a href="#1-主界面" class="headerlink" title="1. 主界面"></a>1. 主界面</h2><ul>
+<li>程序演示视频链接 <a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV1ob4y1r7N9">MapDraw_Introduction</a></li>
+</ul>
+<iframe src="//player.bilibili.com/player.html?aid=631568297&bvid=BV1ob4y1r7N9&cid=367797257&page=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"> </iframe>
+
+<!--![MainFace](../../png/MapDrawFace.png)-->
+<p><img src="https://i.loli.net/2021/06/07/scvMPXYfK7Eo9JO.png" alt="MainFace"><br>主界面由两张图片构成，左侧的工具栏为图片，右侧为加载的底图。</p>
+<ul>
+<li>示例代码为：<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;graphics.h&gt;</span>	<span class="comment">//EasyX</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;conio.h&gt;</span>		<span class="comment">//_getch</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">loadImageUI</span><span class="params">()</span></span>;	<span class="comment">//前向声明，加载UI</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//主函数</span></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="built_in">initgraph</span>(<span class="number">1280</span>, <span class="number">720</span>);</span><br><span class="line"></span><br><span class="line">	<span class="built_in">loadImageUI</span>();</span><br><span class="line"></span><br><span class="line">	Commander	cmder;</span><br><span class="line">	cmder.<span class="built_in">Run</span>();</span><br><span class="line"></span><br><span class="line">	<span class="built_in">closegraph</span>();</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 加载UI</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">loadImageUI</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	IMAGE	img_bg;</span><br><span class="line">	IMAGE	img_menu;</span><br><span class="line"></span><br><span class="line">	<span class="built_in">loadimage</span>(&amp;img_bg, <span class="string">&quot;C:\\Users\\wanghp\\Desktop\\image.jpg&quot;</span>);</span><br><span class="line">	<span class="built_in">loadimage</span>(&amp;img_menu, <span class="string">&quot;C:\\Users\\wanghp\\Desktop\\MapDraw_UI.png&quot;</span>);</span><br><span class="line"></span><br><span class="line">	<span class="built_in">putimage</span>(<span class="number">200</span>, <span class="number">0</span>, &amp;img_bg);</span><br><span class="line">	<span class="built_in">putimage</span>(<span class="number">0</span>, <span class="number">0</span>, &amp;img_menu);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h2 id="2-如何响应按钮消息"><a href="#2-如何响应按钮消息" class="headerlink" title="2. 如何响应按钮消息"></a>2. 如何响应按钮消息</h2><p>当鼠标在工具栏图片对应按钮位置单击时，需要响应对应的功能。其实现思路是：</p>
+<h3 id="2-1-监听鼠标消息"><a href="#2-1-监听鼠标消息" class="headerlink" title="2.1.监听鼠标消息"></a>2.1.监听鼠标消息</h3><p>以下代码监听了鼠标消息，当鼠标左键按下时，弹出一个消息框；当鼠标右键抬起时，退出程序。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="built_in">initgraph</span>(<span class="number">1280</span>, <span class="number">720</span>);</span><br><span class="line">	</span><br><span class="line">	<span class="comment">//加载图片</span></span><br><span class="line">	<span class="built_in">loadImageUI</span>();</span><br><span class="line"></span><br><span class="line">	MOUSEMSG msg;		<span class="comment">//定义变量，保存鼠标消息</span></span><br><span class="line">	<span class="built_in">FlushMouseMsgBuffer</span>();<span class="comment">// 清空鼠标消息缓冲区，避免无效鼠标信息带入到正式判断中</span></span><br><span class="line">	<span class="type">bool</span>	bExit = <span class="literal">false</span>;	<span class="comment">//是否退出的标志</span></span><br><span class="line">	</span><br><span class="line">	<span class="keyword">while</span> (!bExit)	<span class="comment">//一直循环</span></span><br><span class="line">	&#123;</span><br><span class="line">		<span class="keyword">while</span> (<span class="built_in">MouseHit</span>())	<span class="comment">//检查鼠标消息</span></span><br><span class="line">		&#123;</span><br><span class="line">			msg = <span class="built_in">GetMouseMsg</span>();	<span class="comment">//鼠标消息状态</span></span><br><span class="line">			<span class="keyword">switch</span> (msg.uMsg)</span><br><span class="line">			&#123;</span><br><span class="line">			<span class="keyword">case</span> WM_LBUTTONDOWN:	<span class="comment">//左键按下</span></span><br><span class="line">				<span class="built_in">MessageBox</span>(<span class="built_in">GetHWnd</span>(), <span class="string">&quot;LButtonDown&quot;</span>, <span class="string">&quot;Info&quot;</span>, MB_ICONINFORMATION);</span><br><span class="line">				<span class="keyword">break</span>;</span><br><span class="line">			<span class="keyword">case</span> WM_RBUTTONUP:		<span class="comment">//右键抬起</span></span><br><span class="line">				bExit = <span class="literal">true</span>;	<span class="comment">//退出程序标记</span></span><br><span class="line">				<span class="keyword">break</span>;</span><br><span class="line">			<span class="keyword">default</span>:</span><br><span class="line">				<span class="built_in">Sleep</span>(<span class="number">10</span>);	<span class="comment">//休眠10ms</span></span><br><span class="line">				<span class="keyword">break</span>;</span><br><span class="line">			&#125;</span><br><span class="line">	</span><br><span class="line">			<span class="keyword">if</span> (bExit) <span class="keyword">break</span>;	<span class="comment">//退出循环</span></span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="built_in">closegraph</span>();</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-根据鼠标消息的位置，判断单击的是哪个按钮"><a href="#2-根据鼠标消息的位置，判断单击的是哪个按钮" class="headerlink" title="2. 根据鼠标消息的位置，判断单击的是哪个按钮"></a>2. 根据鼠标消息的位置，判断单击的是哪个按钮</h3><p>在WM_LBUTTONDOWN分支中，根据鼠标按钮的位置，来判断鼠标位置，返回鼠标所在控件编号。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="comment">// 省略代码...</span></span><br><span class="line">	<span class="keyword">while</span> (!bExit)	<span class="comment">//一直循环</span></span><br><span class="line">	&#123;</span><br><span class="line">		<span class="keyword">while</span> (<span class="built_in">MouseHit</span>())	<span class="comment">//检查鼠标消息</span></span><br><span class="line">		&#123;</span><br><span class="line">			msg = <span class="built_in">GetMouseMsg</span>();	<span class="comment">//鼠标消息状态</span></span><br><span class="line">			<span class="keyword">switch</span> (msg.uMsg)</span><br><span class="line">			&#123;</span><br><span class="line">			<span class="keyword">case</span> WM_LBUTTONDOWN:	<span class="comment">//左键按下</span></span><br><span class="line">				<span class="keyword">if</span> (x &lt;= <span class="number">160</span> &amp;&amp; x &gt;= <span class="number">40</span>)	<span class="comment">//左侧按钮</span></span><br><span class="line">				&#123;</span><br><span class="line">					<span class="keyword">if</span> (y &gt;= <span class="number">35</span> &amp;&amp; y &lt;= <span class="number">65</span>)	<span class="built_in">MessageBox</span>(<span class="built_in">GetHWnd</span>(), <span class="string">&quot;Load Image&quot;</span>, <span class="string">&quot;Info&quot;</span>, MB_ICONINFORMATION);</span><br><span class="line">					<span class="keyword">else</span> <span class="keyword">if</span> (y &gt;= <span class="number">80</span> &amp;&amp; y &lt;= <span class="number">110</span>) <span class="built_in">MessageBox</span>(<span class="built_in">GetHWnd</span>(), <span class="string">&quot;Load Vector&quot;</span>, <span class="string">&quot;Info&quot;</span>, MB_ICONINFORMATION);</span><br><span class="line">					<span class="keyword">else</span> <span class="keyword">if</span> (y &gt;= <span class="number">125</span> &amp;&amp; y &lt;= <span class="number">155</span>) <span class="built_in">MessageBox</span>(<span class="built_in">GetHWnd</span>(), <span class="string">&quot;New Vector&quot;</span>, <span class="string">&quot;Info&quot;</span>, MB_ICONINFORMATION);</span><br><span class="line">					<span class="comment">// 根据鼠标位置，执行相应的函数...</span></span><br><span class="line">				&#125;</span><br><span class="line">				<span class="keyword">break</span>;</span><br><span class="line">			</span><br><span class="line">			<span class="comment">// 省略...</span></span><br><span class="line">			&#125;</span><br><span class="line">	</span><br><span class="line">			<span class="keyword">if</span> (bExit) <span class="keyword">break</span>;	<span class="comment">//退出循环</span></span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="comment">// 省略...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="3-小结"><a href="#3-小结" class="headerlink" title="3. 小结"></a>3. 小结</h2><p>至此程序的主框架已完成。程序实现了鼠标在左侧Menu图片上左键单击时，可以根据鼠标位置判断鼠标点击的是哪个按钮，响应对应的处理函数。</p>
+<hr>
+<p>Goto | <a href="../README.md">Home</a> | <a href="#%E7%A8%8B%E5%BA%8F%E4%B8%BB%E6%A1%86%E6%9E%B6">Head</a> | <a href="./D2_MouseMsg.md">MouseMsg-&gt;Next</a> | <a href="./D0_EasyX.md">EasyX&lt;-Prev</a> |</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2023/06/05/docs/MapDraw/D1_MainFrame/" data-id="clij09mc20004c8n51jx60azo" data-title="" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2023/06/05/docs/MapDraw/D4_ShapeClass/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          (no title)
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2023/06/05/docs/ClassReserve/%E6%9C%BA%E6%88%BF%E9%A2%84%E7%BA%A6%E7%B3%BB%E7%BB%9F/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title"></div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/06/">June 2023</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2023/06/05/png/RSCmdManual/">(no title)</a>
+          </li>
+        
+          <li>
+            <a href="/2023/06/05/docs/RSImage/Subject/">(no title)</a>
+          </li>
+        
+          <li>
+            <a href="/2023/06/05/docs/RSImage/Statistics/">(no title)</a>
+          </li>
+        
+          <li>
+            <a href="/2023/06/05/docs/RSImage/RSImageFormat/">(no title)</a>
+          </li>
+        
+          <li>
+            <a href="/2023/06/05/docs/RSImage/RSCmdManual/">(no title)</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2023 John Doe<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.6.4.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>

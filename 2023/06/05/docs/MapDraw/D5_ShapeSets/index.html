@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="形状数据集的构建ShapeSet是将输入的图形以list容器组织起来，提供图形添加、删除、修改、绘制等操作。  视频链接ShapeSets    1. ShapeSet类1.1. ShapeSet类的定义ShapeSet以list&lt;Shape*&gt;来存放图形的原因是，Shape*实现了不同形状的统一管理，保证了接口的统一。此处实现的主要函数为：  Append() - 添加一个shape">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Hexo">
+<meta property="og:url" content="http://example.com/2023/06/05/docs/MapDraw/D5_ShapeSets/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="形状数据集的构建ShapeSet是将输入的图形以list容器组织起来，提供图形添加、删除、修改、绘制等操作。  视频链接ShapeSets    1. ShapeSet类1.1. ShapeSet类的定义ShapeSet以list&lt;Shape*&gt;来存放图形的原因是，Shape*实现了不同形状的统一管理，保证了接口的统一。此处实现的主要函数为：  Append() - 添加一个shape">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2023-06-05T15:25:53.667Z">
+<meta property="article:modified_time" content="2022-02-22T04:10:24.201Z">
+<meta property="article:author" content="John Doe">
+<meta name="twitter:card" content="summary">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/typeface-source-code-pro@0.0.71/index.min.css">
+
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+  
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"><span class="fa fa-bars"></span></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+        
+          <a class="nav-icon" href="/atom.xml" title="RSS Feed"><span class="fa fa-rss"></span></a>
+        
+        <a class="nav-icon nav-search-btn" title="Search"><span class="fa fa-search"></span></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://example.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-docs/MapDraw/D5_ShapeSets" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2023/06/05/docs/MapDraw/D5_ShapeSets/" class="article-date">
+  <time class="dt-published" datetime="2023-06-05T15:25:53.667Z" itemprop="datePublished">2023-06-05</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h1 id="形状数据集的构建"><a href="#形状数据集的构建" class="headerlink" title="形状数据集的构建"></a>形状数据集的构建</h1><p>ShapeSet是将输入的图形以list容器组织起来，提供图形添加、删除、修改、绘制等操作。</p>
+<ul>
+<li>视频链接<a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV1eo4y1X7u6?share_source=copy_web">ShapeSets</a><iframe src="//player.bilibili.com/player.html?aid=376624966&bvid=BV1eo4y1X7u6&cid=367801011&page=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"> </iframe></li>
+</ul>
+<hr>
+<h2 id="1-ShapeSet类"><a href="#1-ShapeSet类" class="headerlink" title="1. ShapeSet类"></a>1. ShapeSet类</h2><h2 id="1-1-ShapeSet类的定义"><a href="#1-1-ShapeSet类的定义" class="headerlink" title="1.1. ShapeSet类的定义"></a>1.1. ShapeSet类的定义</h2><p>ShapeSet以list&lt;Shape*&gt;来存放图形的原因是，Shape*实现了不同形状的统一管理，保证了接口的统一。此处实现的主要函数为：</p>
+<ul>
+<li>Append() - 添加一个shape*到链表</li>
+<li>Clear() - 清空链表中的Shape<em>对象，注意此处的Shape</em>需要delete</li>
+<li>Draw() - 绘制每个图形</li>
+<li>operator&lt;&lt; - 输出操作符</li>
+<li>operator&gt;&gt; - 输入操作符<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">pragma</span> once</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;list&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="keyword">namespace</span> MapDraw &#123;</span><br><span class="line">	<span class="keyword">class</span> <span class="title class_">Shape</span>;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">class</span> <span class="title class_">ShapeSet</span></span><br><span class="line">	&#123;</span><br><span class="line">		<span class="keyword">friend</span> ostream&amp; <span class="keyword">operator</span>&lt;&lt;(ostream&amp; os, <span class="type">const</span> ShapeSet&amp; shpset);</span><br><span class="line">		<span class="keyword">friend</span> istream&amp; <span class="keyword">operator</span>&gt;&gt;(istream&amp; is, ShapeSet&amp; shpset);</span><br><span class="line">	<span class="keyword">public</span>:</span><br><span class="line">		<span class="built_in">ShapeSet</span>();</span><br><span class="line">		~<span class="built_in">ShapeSet</span>();</span><br><span class="line"></span><br><span class="line">		<span class="function"><span class="type">void</span> <span class="title">Append</span><span class="params">(Shape* pshp)</span></span>;</span><br><span class="line">		<span class="function"><span class="type">void</span> <span class="title">Clear</span><span class="params">()</span></span>;</span><br><span class="line">		<span class="function"><span class="type">void</span> <span class="title">Draw</span><span class="params">()</span> <span class="type">const</span></span>;</span><br><span class="line">	<span class="keyword">private</span>:</span><br><span class="line">		list&lt;Shape*&gt;	m_lstShape;</span><br><span class="line">	&#125;;</span><br><span class="line"></span><br><span class="line">	ostream&amp; <span class="keyword">operator</span>&lt;&lt;(ostream&amp; os, <span class="type">const</span> ShapeSet&amp; shpset);</span><br><span class="line">	istream&amp; <span class="keyword">operator</span>&gt;&gt;(istream&amp; is, ShapeSet&amp; shpset);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h2 id="1-2-Shapeset类的实现"><a href="#1-2-Shapeset类的实现" class="headerlink" title="1.2. Shapeset类的实现"></a>1.2. Shapeset类的实现</h2><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;ShapeSet.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;Shape.h&quot;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">namespace</span> MapDraw &#123;</span><br><span class="line">	ShapeSet::<span class="built_in">ShapeSet</span>()</span><br><span class="line">	&#123;</span><br><span class="line"></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	ShapeSet::~<span class="built_in">ShapeSet</span>()</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="built_in">Clear</span>();</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="function"><span class="type">void</span> <span class="title">ShapeSet::Append</span><span class="params">(Shape* pshp)</span></span></span><br><span class="line"><span class="function">	</span>&#123;</span><br><span class="line">		<span class="keyword">if</span> (pshp)</span><br><span class="line">			m_lstShape.<span class="built_in">push_back</span>(pshp);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="function"><span class="type">void</span> <span class="title">ShapeSet::Clear</span><span class="params">()</span></span></span><br><span class="line"><span class="function">	</span>&#123;</span><br><span class="line">		<span class="keyword">while</span> (!m_lstShape.<span class="built_in">empty</span>())</span><br><span class="line">		&#123;</span><br><span class="line">			<span class="built_in">delete</span> (*m_lstShape.<span class="built_in">rbegin</span>());	<span class="comment">//delete</span></span><br><span class="line">			m_lstShape.<span class="built_in">pop_back</span>();</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="function"><span class="type">void</span> <span class="title">ShapeSet::Draw</span><span class="params">()</span> <span class="type">const</span></span></span><br><span class="line"><span class="function">	</span>&#123;</span><br><span class="line">		<span class="keyword">for</span> (<span class="keyword">auto</span>&amp; pshp : m_lstShape)</span><br><span class="line">		&#123;</span><br><span class="line">			<span class="keyword">if</span> (pshp)	pshp-&gt;<span class="built_in">Draw</span>();</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	ostream&amp; <span class="keyword">operator</span>&lt;&lt;(ostream&amp; os, <span class="type">const</span> ShapeSet&amp; shpset)</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="keyword">for</span> (<span class="keyword">auto</span>&amp; pshp : shpset.m_lstShape)</span><br><span class="line">			os &lt;&lt; (*pshp);</span><br><span class="line">		<span class="keyword">return</span> os;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	istream&amp; <span class="keyword">operator</span>&gt;&gt;(istream&amp; is, ShapeSet&amp; shpset)</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="keyword">while</span> (!is.<span class="built_in">eof</span>())</span><br><span class="line">		&#123;</span><br><span class="line">			Shape*	pshp = Shape::<span class="built_in">findClone</span>(is);	<span class="comment">//findClone的实现见下</span></span><br><span class="line">			<span class="keyword">if</span> (pshp)	shpset.<span class="built_in">Append</span>(pshp);</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">return</span> is;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="2-Shape-findClone"><a href="#2-Shape-findClone" class="headerlink" title="2. Shape::findClone"></a>2. Shape::findClone</h2><p>finClone是一个静态函数，其目的是从输入流中创建一个Shape实体，并通过输入流设置其参数。其具体流程为：</p>
+<ol>
+<li>从输入流读入某行的第1个参数</li>
+<li>根据参数（0-PNT, 1-LINE, 2-PLY, 其他-错误）new 对应实体</li>
+<li>调用对象&lt;&lt;函数，初始化值</li>
+</ol>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">class</span> Shape</span></span><br><span class="line"><span class="function">		<span class="type">static</span> Shape* <span class="title">findClone</span><span class="params">(istream&amp; is)</span></span>;</span><br><span class="line">&#125;；</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="function">Shape* <span class="title">Shape::findClone</span><span class="params">(istream&amp; is)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="type">int</span>	type;</span><br><span class="line">	Shape*		pshp = <span class="literal">nullptr</span>;</span><br><span class="line">	is &gt;&gt; type;</span><br><span class="line">	<span class="keyword">switch</span> (type)</span><br><span class="line">	&#123;</span><br><span class="line">	<span class="keyword">case</span> PNT:</span><br><span class="line">		pshp = <span class="keyword">new</span> <span class="built_in">Point</span>();</span><br><span class="line">		<span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> LIN:</span><br><span class="line">		pshp = <span class="keyword">new</span> <span class="built_in">Line</span>();</span><br><span class="line">		<span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> PLY:</span><br><span class="line">		pshp = <span class="keyword">new</span> <span class="built_in">Polygon</span>();</span><br><span class="line">		<span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">default</span>:</span><br><span class="line">		pshp = <span class="literal">nullptr</span>;</span><br><span class="line">		<span class="keyword">break</span>;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> (pshp)</span><br><span class="line">		is &gt;&gt; (*pshp);</span><br><span class="line">	<span class="keyword">return</span> pshp;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>ShapeSet对象作为Commander的成员变量，用于形状的存储。</li>
+</ul>
+<h2 id="3-小结"><a href="#3-小结" class="headerlink" title="3. 小结"></a>3. 小结</h2><p>至此，可以打开一个文件，创建多个图形对象，并存放于Shapeset中。同时，也可以将Shapeset中的图形存入文件中。下一节，将介绍如何响应MenuMouseMsg()来读入和存图形文件。</p>
+<hr>
+<p>Go to | <a href="../README.md">Home</a> | <a href="#%E5%BD%A2%E7%8A%B6%E6%95%B0%E6%8D%AE%E9%9B%86%E7%9A%84%E6%9E%84%E5%BB%BA">Head</a> | <a href="./D6_ShapeIO.md">ShapeIO-&gt;Next</a> | <a href="./D4_ShapeClass.md">&lt;-Prev</a> |</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2023/06/05/docs/MapDraw/D5_ShapeSets/" data-id="clij09mc30006c8n55wno51ym" data-title="" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2023/06/05/docs/RSImage/Display/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          (no title)
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2023/06/05/docs/MapDraw/D4_ShapeClass/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title"></div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/06/">June 2023</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2023/06/05/png/RSCmdManual/">(no title)</a>
+          </li>
+        
+          <li>
+            <a href="/2023/06/05/docs/RSImage/Subject/">(no title)</a>
+          </li>
+        
+          <li>
+            <a href="/2023/06/05/docs/RSImage/Statistics/">(no title)</a>
+          </li>
+        
+          <li>
+            <a href="/2023/06/05/docs/RSImage/RSImageFormat/">(no title)</a>
+          </li>
+        
+          <li>
+            <a href="/2023/06/05/docs/RSImage/RSCmdManual/">(no title)</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2023 John Doe<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.6.4.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>
