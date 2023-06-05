@@ -1,0 +1,328 @@
+
+\section{LPS模块使用}
+\subsection{简介}
+    摄影测量从模拟摄影测量发展到数字摄影测量。本实习旨在理解并掌握数字摄影测量软件的操作、空中三角测量及DEM生成的流程。
+\subsection{操作流程}
+    \subsubsection{空中三角测量}
+    \begin{enumerate}
+        \item 建立项目：
+        \begin{figure}[H]
+            \centering
+            \subfigure[建立新项目]
+            {
+                \includegraphics[width=0.22\textwidth]{lps/createnew.png}
+            }
+            \subfigure[选择相机类型]
+            {
+                \includegraphics[width=0.22\textwidth]{lps/camerachoose.png}
+            }
+            \subfigure[设置区域参数]
+            {
+                \includegraphics[width=0.22\textwidth]{lps/create_block.png}
+            }
+            \subfigure[设置坐标系]
+            {
+                \includegraphics[width=0.22\textwidth]{lps/create_projection.png}
+            }
+            \caption{项目建立}
+        \end{figure}
+
+        \hspace{20pt}选择\textit{File -> New}建立新项目。设置项目位置，选择相机类型为框幅式(Frame Camera)，
+        在Block Property Setup页面中的Horizortal框中点击set按钮，则弹出Projection Chooser界面。选择
+        US State Frame - NAD27 - Old USGS(DO154)Zone Numbers中的COLORADO CENTRAL(3476)。
+
+        \item 添加框幅像片
+        
+        \begin{figure}[H] 
+            \centering 
+            \includegraphics[width=0.4\textwidth]{lps/2_addimge.png}
+            \caption{打开框幅影像}
+        \end{figure}
+
+        \hspace{20pt}在软件左部的列表中，右键Image，点击Add，将实验影像导入。
+
+        \item 计算影像金字塔
+        
+        \begin{figure}[H]
+            \centering
+            \subfigure[选中计算影像金字塔]
+            {
+                \includegraphics[width=0.4\textwidth]{lps/3_compute.png}
+            }
+            \subfigure[计算参数]
+            {
+                \includegraphics[width=0.3\textwidth]{lps/3_computepy.png}
+            }
+            \caption{计算影像金字塔}
+        \end{figure}
+
+        \hspace{20pt}在打开所有影像之后，在\textit{Edit->Compute Pyramid Layers}中打开参数设置对话框，
+        选择All Image without Pyramids并运行，由此建立影像金字塔。
+
+        \item 定义相机模型
+        
+        \begin{enumerate}
+            \item 输入相机信息
+            \begin{figure}[H]
+                \centering
+                \subfigure[设置相机]
+                {
+                    \includegraphics[width=0.3\textwidth]{lps/4_0.png}
+                }
+                \subfigure[设置相机参数]
+                {
+                    \label{1_camerainf}
+                    \includegraphics[width=0.3\textwidth]{lps/4_1.png}
+                }
+                \subfigure[设置相机框标点]
+                {
+                    \label{1_camerakuangbiao}
+                    \includegraphics[width=0.3\textwidth]{lps/4_2.png}
+                }
+                \caption{设置相机}
+            \end{figure}
+
+            \hspace{20pt}选择\textit{Edit->Frame Editor}弹出设置相机窗口。在Frame Camera Frame Editor框中，选择Edit Camera，
+            弹出Camera Information对话框。选择General，设置参数如图(\ref{1_camerainf})所示。随后选择Fiducials添加框标坐标。
+            框标坐标如图(\ref{1_camerakuangbiao})所示，点击OK返回。
+
+            \item 内定向
+            
+            \begin{figure}[H]
+                \centering
+                \subfigure[框标点1]
+                {
+                    \includegraphics[width=0.25\textwidth]{lps/4_interor.png}
+                }
+                \subfigure[框标点2]
+                {
+                    \includegraphics[width=0.25\textwidth]{lps/4_interor2.png}
+                }
+                \subfigure[框标点3]
+                {
+                    \includegraphics[width=0.25\textwidth]{lps/4_interor3.png}
+                }
+                \caption{内定向}
+            \end{figure}
+
+            \hspace{20pt}完成上一步后，在Frame Camera Frame Editor对话框中选择Interior Orientation(内定向)。
+            选择Viewer Fiducial Locator中左上角第一个按钮，会显示示例影像的三个不同尺度。此时需要用鼠标在影像中点击框标点
+            中心(十字丝中心或点中心)确定框标点的像方坐标。此步需要仔细调整，直到RMSE小于0.1pixels时即可。如此反复，直到三幅影像均完成
+            框标点坐标的确定即可进行下一步。
+
+            \item 绝对定向
+            
+            \begin{figure}[H] 
+                \centering 
+                \includegraphics[width=0.5\textwidth]{lps/4_exter.png}
+                \caption{绝对定向}
+            \end{figure}
+
+            \hspace{20pt}完成上一步后，在Frame Camera Frame Editor对话框中选择Exterior Information(外定向)。
+            针对每一幅影像，输入其外方位元素。三幅影像的外方位元素如表所示。填写完成后点击OK。
+
+            \begin{table}[H]
+                \centering
+
+                \begin{tabular}{ccccccc}
+                    \toprule
+                      影像  & Xo & Yo & Zo & Omega & Phi & Kappa \\
+                    \midrule
+                        col90p1  &  666700.000 & 115900.000 & 8800.000 & 0.0000 & 0.0000 & 90.0000 \\
+                        col91p1  & 666700.000 & 119400.000 & 8800.000 & 0.0000 & 0.0000 & 90.0000  \\
+                        col92p1  & 666800.000 & 122900.000 & 8800.000 & 0.0000 & 0.0000 & 90.0000  \\
+                    \bottomrule
+                \end{tabular}
+                \caption{影像外方位元素}
+                \label{lps_expos}
+            \end{table}
+
+        \end{enumerate}
+
+        \item 测量控制点
+        
+        \hspace{20pt}选择\textit{Edit->Point Measurement}，选择Classic Point Measurement Tool。
+        \begin{figure}[H] 
+            \centering 
+            \includegraphics[width=0.6\textwidth]{lps/5_0.png}
+            \caption{测量控制点}
+        \end{figure}
+
+        \hspace{20pt}该步骤的目的是获取影像的同名点像方坐标。其具体操作为：在右部的的right view和left view中
+        选择重叠影像。随后点击Add按钮生成一条记录。设置该记录的点号和点的Usage。在右上角工具框中选择从左往右第二个
+        类似于十字的按钮，随后在左右二幅影像中选择同一位置，确定该控制点在二幅影像中的像空间坐标，并输入其真实地理坐标。
+
+        \begin{enumerate}
+            \item 测量控制点
+            测量控制点的Usage为Control，其余步骤同上。其点位坐标如下：
+            \begin{table}[H]
+                \centering
+                \begin{tabular}{ccccc}
+                    \toprule
+                      点号  & col90p1(x,y) & col91p1(x,y) & col92p1(x,y) & 地理坐标(X,Y,Z)  \\
+                    \midrule
+                        1002 & (952.625,819.625) & (165.875,846.625) & - & (665228.955,115012.472,1947.672) \\
+                        1003 & (1857.875,639.125) & (1064.875,646.375) & (286.875,639.125) & (664456.22,119052.15,1988.820) \\
+                        1004 & - & (1839.52,1457.43) & (1050.60,1465.23) & (668150.61,122404.68,1972.056) \\
+                        1005 & (1769.450,1508.430) & (1007.250,1518.170) & (224.670,1510.670) & (668338.22,118685.90,1886.712) \\
+                        1006 & (1787.875,2079.625) & (1023.625,2091.390) & (215.125,2083.790) & (670841.48,118696.89,2014.00)\\ 
+                    \bottomrule
+                \end{tabular}
+                \caption{测量控制点}
+            \end{table}
+
+            \item 测量检查点
+            测量控制点的Usage为Check，其余步骤同上。其点位坐标如下：
+            \begin{table}[H]
+                \centering
+                \begin{tabular}{ccccc}
+                    \toprule
+                      点号  & col90p1(x,y) & col91p1(x,y) & col92p1(x,y) & 地理坐标(X,Y,Z)  \\
+                    \midrule
+                        2001 & (915.02,2095.71) & (160.90,2127.84) & - & (670970.45,114815.23,1891.888) \\
+                        2002 & - & (2032.030,2186.530) & (1227.375,2199.125) & (671408.73,123166.52,1983.762) \\
+                    \bottomrule
+                \end{tabular}
+                \caption{检查控制点}
+            \end{table}
+
+        \end{enumerate}
+
+        \item 连接点自动生成
+        
+        \hspace{20pt}在完成上一步测量工作后，点击右上角第二行第一个按钮(perform automatic generation)，自动生成其余的连接点。
+        随后保存结果并推出Point Measurement工具。
+
+        \item 空中三角测量
+        
+        \begin{figure}[H]
+            \centering
+            \subfigure[空三测量]
+            {
+                \includegraphics[width=0.4\textwidth]{lps/6_0.png}
+            }
+            \subfigure[测量结果]
+            {
+                \label{Triangulationresult}
+                \includegraphics[width=0.35\textwidth]{lps/6_1.png}
+            }
+            \caption{空中三角测量}
+        \end{figure}
+
+        \hspace{20pt}选择\textit{Edit->Triangulation Properties}打开Aerial Triangulation对话框，打开Point标签，
+        在GCP Type and Standard Deviations部分点击Type下拉菜单选择Same Weighted Values，点击Run按钮运行空三测量程序。
+    
+        \hspace{20pt}空三测量完成后自动打开Triangulation Summary对话框(图(\ref{Triangulationresult}))
+        此对话框显示了整个影像的单位权中误差与检查点中误差。若需查看详细结果，点击Report按钮。点击Accept，则Ext项显示绿色。
+
+        \begin{figure}[H]
+            \centering
+            \subfigure[外方位元素]
+            {
+                \includegraphics[width=0.8\textwidth]{lps/6_exterpara.png}
+            }
+            \subfigure[外方位元素误差]
+            {
+                \includegraphics[width=0.8\textwidth]{lps/6_exterpararms.png}
+            }
+            \caption{外方位元素求解}
+        \end{figure}
+
+    \end{enumerate}
+    
+
+    \subsubsection{数字地面模型建立}
+
+    \begin{enumerate}
+        \item DTM类型设置
+        \begin{figure}[H]
+            \centering
+            \subfigure[进入DTM设置对话框]
+            {
+                \includegraphics[width=0.4\textwidth]{lps/dtm1_0.png}
+            }
+            \subfigure[DTM设置对话框]
+            {
+                \includegraphics[width=0.3\textwidth]{lps/dtm1_1.png}
+            }
+            \caption{DTM类型设置}
+        \end{figure}
+
+        \hspace{20pt}选择\textit{Process->DTM Extraction->Classic ATE}。设置Output路径，设置
+        Cell size为20。随后点击Advanced Properties进入高级设置。
+
+        \item 常规设置
+        
+        \begin{figure}[H] 
+            \centering 
+            \includegraphics[width=0.5\textwidth]{lps/dtm2_0.png}
+            \caption{常规设置}
+        \end{figure}
+
+        \hspace{20pt}Advanced Properties高级设置中点击General进入常规设置。此处可改变投影等。
+        勾选Reduce DTM Correlation Area并将其设置为10\%。勾选Trim the DTM Border by并将其设置
+        为5\%。勾选Create Contour Map则会生成等高线，设置等高距(Contour Interval)为40，设置移除
+        短于60的等高线。
+
+        \item 影像对设置
+        
+        \hspace{20pt}Advanced Properties高级设置中点击Image Pair进入影像对设置。选中Show Active Only，并
+        点击其右侧的按钮，会弹出三个影像框。用户可以查看各个影像对是否正确，亦可以选择影像对是否被激活。
+
+        \begin{figure}[H] 
+            \centering 
+            \includegraphics[width=0.5\textwidth]{lps/dtm3_0.png}
+            \caption{影像对设置}
+        \end{figure}
+
+        \item 精度设置
+        
+        \begin{figure}[H] 
+            \centering 
+            \includegraphics[width=0.5\textwidth]{lps/dtm4_0.png}
+            \caption{精度设置}
+        \end{figure}
+
+        \hspace{20pt}Advanced Properties高级设置中点击Accuracy进入精度设置。勾选Show Image ID和Use Block Tie Points。
+        选中Use External DEM以指定外部参考DEM。选中Use User Defined Points，点击Import指定附加点信息(该步骤缺少对应的检查点文件)。
+        随后点击OK保存设置。
+
+        \item 提取与查看
+
+
+        \hspace{20pt}保存上述设置后会返回DTM Extraction窗口。点击Run则会生成相应的等高线和DEM影像。
+
+        \begin{figure}[H]
+            \centering
+            \subfigure[影像对1]
+            {
+                \includegraphics[width=0.4\textwidth]{lps/dtmresult1.png}
+            }
+            \subfigure[影像对2]
+            {
+                \includegraphics[width=0.4\textwidth]{lps/dtmresult2.png}
+            }
+            \caption{DTM结果}
+        \end{figure}
+
+        \item 成果报告
+
+        \begin{figure}[H]
+            \centering
+            \subfigure[基本信息]
+            {
+                \includegraphics[width=0.4\textwidth]{lps/dtm5_0.png}
+            }
+            \subfigure[误差]
+            {
+                \includegraphics[width=0.4\textwidth]{lps/dtm5_1.png}
+            }
+            \caption{结果报告}
+        \end{figure}
+
+        选择\textit{Process->DTM Extraction Report}可以读取DTM成果报告，检验DTM质量。可见
+        其RMS为11.1573。
+
+    \end{enumerate}
+\subsection{小结}
+    本次实习通过操作ERDAS中的LPS模块，掌握了空中三角测量和利用影像对生成DEM的流程，了解了影响精度的变量，基本达到实习目的。

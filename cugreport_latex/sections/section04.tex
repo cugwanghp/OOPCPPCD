@@ -1,0 +1,523 @@
+
+\newpage
+\section{特征提取：Harris算子}
+\subsection{简介}
+    \textit{Harris}算子是一种特征点提取算子，其是一种针对\textit{Moravec}算子的改进。
+    其通过一个二元正态函数对检测窗口内灰度加权，距离中心越近的像元获得更高的权重，由此
+    抑制噪声。同时其通过二元泰勒展开式去近似任意方向差异。最后通过定义角点函数判断其是否为角点。
+\subsection{原理}
+    \subsubsection{符号约定}
+    \begin{table}[H]
+        \centering
+        \setlength{\tabcolsep}{15mm}{
+        \begin{tabular}{cl}
+            \toprule
+              符号  & 说明 \\
+            \midrule
+                $u,v$  & 整幅影像空间中某一像元点坐标  \\
+                $x,y$  & 窗口中某一像元坐标  \\
+                $I_x,I_y$  & 窗口矩阵在$x,y$方向上的梯度  \\
+                $I(x,y)$  & 窗口中，点$(x,y)$的像元值（灰度值/DN值）  \\
+                $E(u,v)$  & 影像中，点$(u,v)$的灰度变化值  \\
+                $w(u,v)$  & 窗口中，点$(u,v)$的窗函数值  \\
+                $\bm{H}$ & \textit{Harris}矩阵 \\
+                $\lambda_1,\lambda_2$ & \textit{Harris}矩阵的特征值 \\
+                $R$ & 角点准则值 \\
+            \bottomrule
+        \end{tabular}}
+        \caption{符号约定}
+        \label{harris_symbol}
+    \end{table}
+
+    \subsubsection{基础概念}
+        \begin{theorem}{多元正态分布}
+            其假设$N$维随机向量$X=[X_1,X_2, \cdots ,X_n]^T$服从多变量正态分布，且其协方差$\Sigma$为非奇异阵，
+            则可用下列概率密度函数(Probability Density Function,PDF)描述：
+            \begin{equation}
+                \label{normalpdf}
+                f_x(x_1,x_2, \cdots ,x_n)=\frac{1}{\sqrt{(2\pi)^k |\Sigma|}}e^{-\frac{1}{2}(\bm{X}-\bm{\mu})^T \Sigma^{-1}(\bm{X}-\bm{\mu})  }              
+            \end{equation}
+        \end{theorem}
+
+        \begin{theorem}{泰勒展开式}
+            其多元函数在点$x_k$处的泰勒展开为（仅保留至一阶导项）：
+            \begin{equation}
+                \begin{aligned}
+                    f(x^1,x^2, \cdots , x^n)=f(x_k^1,x_k^2, \cdots , x_k^n)+\sum_i^n (x^i-x_k^i)f^{'}_{x^i}(x_k^1,x_k^2, \cdots , x_k^n)+o^n
+                \end{aligned}
+            \end{equation}
+
+            针对二元函数，其有：
+            \begin{equation}
+                \begin{aligned}
+                    \label{taylor}
+                    f(x,y)=f(x_k,y_k)+(x-x_k)f^{'}(x_k,y_k)+(y-y_k)f^{'}(x_k,y_k)+o^n
+                \end{aligned}
+            \end{equation}
+            
+        \end{theorem}
+
+        \begin{theorem}{灰度变化}{}
+            定义灰度变化计算式：
+            \begin{equation}
+                \label{calIvalue}
+                E(u,v)=\sum_{x,y} w(x,y)[I(u+x,v+y)-I(x,y)]^2
+            \end{equation}
+            其中：$u,v$为像元在整幅影像中的横纵坐标，$x,y$为像元在窗口中的坐标，$w()$为加权窗函数，$I()$为像元值（灰度值）。
+        \end{theorem}
+
+    \subsubsection{算法原理}
+        \begin{enumerate}
+            \item 计算窗口内灰度变化：
+
+            \hspace{20pt}根据式(\ref{calIvalue})可以计算中心像元灰度变化，但其存在一定局限性。
+            其仅可以计算一个方向的像元灰度变化。\textit{Harris}算法的一个改进即使通过二元函数泰勒展开
+            计算多个方向上的灰度变化。根据式(\ref{calIvalue},\ref{taylor})可得：
+            \begin{equation}
+                \begin{aligned}
+                    E(u,v) & \approx \sum_{x,y} w(x,y) [I(x,y) + \frac{\partial I}{\partial x}(x,y)u + \frac{\partial I}{\partial y}(x,y)v -I(x,y)]^2 \\
+                           & = \sum_{x,y} w(x,y) [\frac{\partial I}{\partial x}(x,y)u + \frac{\partial I}{\partial y}(x,y)v ]^2 \\
+                \end{aligned}
+            \end{equation}
+            不妨令$\frac{\partial I}{\partial x}(x,y) = I_x,\frac{\partial I}{\partial y}(x,y)=I_y$，则有
+
+            \begin{equation}
+                \begin{aligned}
+                    \label{harrisEuv}
+                    E(u,v)&=\sum_{x,y} w(x,y) (u^2 I_x^2 + 2uv I_X I_y + v^2 I_y^2)\\
+                            &=\begin{bmatrix}u & v\end{bmatrix} (\sum w(x,y) \begin{bmatrix} I_x^2 & I_x I_y \\ I_x I_y & I_y^2 \end{bmatrix})  \begin{bmatrix}u \\ v\end{bmatrix} \\
+                            & = \begin{bmatrix}u & v\end{bmatrix} \bm{H} \begin{bmatrix}u \\ v\end{bmatrix}
+                \end{aligned}
+            \end{equation}
+
+            \item 分析窗口灰度变化：
+            
+            \hspace{20pt}从式(\ref{harrisEuv})中可以分析得到，灰度变化仅与Harris矩阵$\bm{H}$有关，
+            故对其进行特征值分解，可得到两个方向的特征值$\lambda_1, \lambda_2$，其表示两个相互垂直方向上灰度变化的快慢，
+            可分析得到以下几种情况：
+            \begin{itemize}
+                \item 特征值近似且均较小($\lambda_1 \approx \lambda \approx 0$)：表示该点在两个垂直方向变化均很小，兴趣点在匀质区域。
+                \item 某个特征值较大，另一个较小($\lambda_1 \gg 0 , \lambda_2 \approx 0 $)：表示点在某一个方向变化较大，另一个方向变化较小，兴趣点位于边缘。
+                \item 二个特征值均较大($\lambda_1 \gg 0 , \lambda_2 \gg 0$)：表示两个特征点都变化很快，兴趣点位于角点。
+            \end{itemize}
+
+            \item 提取角点：
+            
+            \hspace{20pt}尽管上述特征可以判断角点，但是二个特征向量之比较仍然难以统一。
+            因此，定义\textit{Harris}角点准则：
+                \begin{equation}
+                    \begin{aligned}
+                        \label{harrisR}
+                        R&=det(\bm{H})-k \times trace(\bm{H})\\
+                         &= \lambda_1 \lambda_2 - k \times (\lambda_1 + \lambda_2)
+                    \end{aligned}
+                \end{equation}
+            其中：$R$为角点准则值，$det$表示矩阵的行列式，$trace$表示矩阵的迹，$k$为系数，取值范围一般为$0.04 \sim 0.06$。
+
+            \hspace{20pt}当计算出每一个像元的$R$值后，通过一定的阈值提取对应角点位置。
+
+
+        \end{enumerate}
+        
+
+\subsection{程序编写}
+    \subsubsection{开发环境}
+    程序基于\textit{Python}语言编写，使用\textit{Pycharm}进行编写。程序中使用\textit{Opencv}库对影像进行读写，使用\textit{Numpy}库进行矩阵运算，使用\textit{Matplotlib}库进行结果可视化。
+    \subsubsection{算法流程}
+    \begin{enumerate}
+        \item [(1)]影像预处理：这一步包括将彩色影像转换为灰度影像，影像几何变换，影像加噪声等处理。
+        \item [(2)]计算各像元角点准则值：在影像中选取窗口，以一个像素为步长遍历。根据式(\ref{harrisEuv},\ref{harrisR})计算该窗口的角点准则值。以此往复，直到影像内所有像素之特征值计算完成。
+        \item [(3)]计算阈值提取特征点：根据原理中的描述，阈值之选取有以下几种：
+            \begin{itemize}
+                \item 特定值：直接根据用户设定的阈值选取。
+                \item 均值：计算兴趣值之均值。
+                \item 百分比：对得到的兴趣值进行排序，选取第$k\%$作为阈值。(如$95\%$)
+            \end{itemize}
+        \item [(4)]极大值抑制：选取一定窗口大小，对图像以一定步长进行遍历。对每一个窗口，若中心点为局部最大值则保留，反之则丢弃。
+        \item [(5)]输出影像。
+    \end{enumerate}
+
+    \begin{figure}[H]
+        \centering 
+        \includegraphics[width=\textwidth]{harrs/stream.png}
+        \caption{流程图}
+        \label{harris_stream}
+    \end{figure}
+    
+
+    \subsubsection{核心代码说明}
+        \begin{enumerate}
+            \item 计算$\bm{H}$矩阵内参数
+            
+            \begin{figure}[H]
+                \centering
+                \subfigure[计算梯度]
+                {
+                    \includegraphics[width=0.45\textwidth]{harrs/grad.png}
+                    \label{calgrad}
+                }
+                \subfigure[高斯滤波]
+                {
+                    \includegraphics[width=0.45\textwidth]{harrs/gauss.png}
+                    \label{calgauss}
+                }
+                \caption{计算矩阵内值}
+                \label{calHcode}
+            \end{figure}
+
+            该部分代码为计算矩阵内的$I_x,I_y$(如式(\ref{harrisEuv}))。其获得的为矩阵在\textit{x,y}两个方向上的数值梯度(如)。
+            根据式(\ref{harrisEuv}),需要对$I_x^2, I_y^2 , I_x I_y$进行高斯滤波。从而构成$\bm{H}$矩阵。
+            其中高斯核为一个与窗口同大小的矩阵。其以中心像元为极值点，根据正态分布概率密度函数(式\ref{normalpdf})生成。
+
+            \item 计算$R$值
+            \begin{figure}[H]
+                \centering 
+                \includegraphics[width=0.8\textwidth]{harrs/calr.png}
+                \caption{计算角点准则值}
+                \label{calharrisR}
+            \end{figure}
+            该段代码根据式(\ref{harrisR})计算角点准则值。其中，temp1,temp2是为了构成
+            $\bm{H}$矩阵而申请的临时变量。
+
+        \end{enumerate}
+
+
+    \subsubsection{函数调用}
+        本次实习中，程序将\textit{Harris}算子封住为一个类。因此其调用需要申请一个类对象，随后
+        调用对象的\textit{Harris()}函数，得到提取出特征点之坐标。
+
+        在申请对象的时候，需要输入二个参数：
+        \begin{itemize}
+            \item 影像：需要灰度化后的影像，数据类型为\textit{Numpy}
+            \item \textit{Harris}参数：为一个字典，其具体定义如下：
+            \begin{itemize}
+                \item 窗口尺寸(window\_size):计算兴趣点的窗口大小
+                \item 阈值选择模式(threshold\_mode):包括均值模式(mean),值模式(value),百分比模式(percent)
+                \item 阈值(threshold):当为均值模式下，其无效；当为值模式下，表示阈值的值；当为百分比模式下，为后百分之k
+                \item 窗口尺寸(local\_window):极大抑制的窗口大小
+                \item 高斯分布参数(gauss\_sigma):调整高斯分布的方差
+                \item 角点准则函数参数(alpha):调整角点准则函数中的\textit{k}
+            \end{itemize}
+        \end{itemize}
+
+\subsection{结果分析}
+    \subsubsection{结果展示}
+    \begin{figure}[H]
+        \centering
+        \subfigure[实验图1]
+        {
+            \includegraphics[width=0.4\textwidth]{harrs/result/areial.png}
+        }
+        \subfigure[实验图2]
+        {
+            \includegraphics[width=0.4\textwidth]{harrs/result/f16.png}
+        }
+        \subfigure[实验图3]
+        {
+            \includegraphics[width=0.4\textwidth]{harrs/result/house.png}
+        }
+        \subfigure[实验图4]
+        {
+            \includegraphics[width=0.4\textwidth]{harrs/result/penta.png}
+        }
+        \caption{提取结果}
+        \label{harris_result}
+    \end{figure}
+    图(\ref{harris_result})中的十字点为提取结果，不同颜色代表不同的兴趣值。兴趣值图例位于右侧。与\textit{Moravec}算子不同，\textit{Harris}算子计算得到的\textit{R}值较大
+    ，且数值差异亦很大。因此难以通过分层设色来显示特征点的\textit{R}值。
+        可见不同影像其角点的兴趣值不同。亦可以看出，兴趣值高的地方不一定是理想的特征点，而仅仅可能是变化距离的地方。
+        因此阈值的选择可能需要仔细考虑。同时可看出，其整体提取效果要略优于\textit{Moravec}算子。
+    
+
+    \subsubsection{不同波段对于提取结果影响}
+    \begin{figure}[H]
+        \centering
+        \subfigure[蓝波段]
+        {
+            \includegraphics[width=0.22\textwidth]{harrs/result/f16b.png}
+        }
+        \subfigure[绿波段]
+        {
+            \includegraphics[width=0.22\textwidth]{harrs/result/f16g.png}
+        }
+        \subfigure[红波段]
+        {
+            \includegraphics[width=0.22\textwidth]{harrs/result/f16r.png}
+        }
+        \subfigure[灰度]
+        {
+            \includegraphics[width=0.22\textwidth]{harrs/result/f16grey.png}
+        }
+        \caption{不同波段提取结果}
+        \label{harrisf16rgbg}
+    \end{figure}
+
+    本节以分析彩色影像不同颜色波段对于提取结果的影像。灰度合成如先前\textit{Moravec}所述。不同波段提取结果具有一定差异。
+    \begin{itemize}
+        \item 蓝波段:前景上边界点和背景的山脊均有较多特征点提取出。
+        \item 绿波段:背景山脊有较多特征点提取出，前景飞机上亦有部分特征点提取出，但数量少于蓝波段。
+        \item 红波段:背景山脊有较多特征点提取出，前景飞机上特征点提取数目进一步降低。尤其在飞机尾翼处，无特征点提取出。
+        \item 灰度影像:背景山脊和前景飞机上都有较多特征点提取出，但并非上述三个波段的交集。略少于蓝波段。
+    \end{itemize}
+    从结果实验上分析，蓝波段提取效果最佳，而灰度波段提取效果次之，绿色提取效果再次之，红色提取效果最差。这可能仅仅是与该影像的组成有关。
+    因此本节认为通用做法应该是利用式(\ref{calgray})计算灰度影像，由灰度影像提取角点。
+
+    \subsubsection{参数对提取结果影响}
+    \begin{enumerate}
+        \item 计算窗口大小：
+        
+        \begin{figure}[H]
+            \centering
+            \subfigure[计算窗口5x5]
+            {
+                \includegraphics[width=0.3\textwidth]{harrs/result/win5.png}
+            }
+            \subfigure[计算窗口7x7]
+            {
+                \includegraphics[width=0.3\textwidth]{harrs/result/win7.png}
+            }
+            \subfigure[计算窗口9x9]
+            {
+                \includegraphics[width=0.3\textwidth]{harrs/result/win9.png}
+            }
+            \subfigure[计算窗口11x11]
+            {
+                \includegraphics[width=0.3\textwidth]{harrs/result/win11.png}
+            }
+            \subfigure[计算窗口13x13]
+            {
+                \includegraphics[width=0.3\textwidth]{harrs/result/win13.png}
+            }
+            \subfigure[计算窗口15x15]
+            {
+                \includegraphics[width=0.3\textwidth]{harrs/result/win15.png}
+            }
+            \subfigure[趋势变化]
+            {
+                \includegraphics[width=0.8\textwidth]{harrs/result/winline.png}
+            }
+            \caption{不同计算窗口提取结果}
+            \label{harriscalwinpic}
+        \end{figure}
+        \hspace{20pt}根据实验结果分析，当计算窗口从$5 \times 5$提升到$9 \times 9$时，提取点数逐渐减少。减少的特征点在建筑物角点、小地物等处均有损失。
+        但当计算窗口继续增大，得到的特征点数量陡升。分析其提取之特征点发现，在平坦区域等变化较缓的区域出现了较多的不佳特征点，同时原本的建筑角点亦大面积丢失。
+        结合其计算的\textit{R}值可以发现，随着计算窗口的增大，其值显著变小。若选取特定值作为阈值，随着窗口增大，可能无特征点提取出。
+
+        \hspace{20pt}因此本节实验认为，\textit{Harris}算子计算窗口应偏小。推荐的计算窗口为$7 \times 7$。
+        \item 阈值大小：
+        
+        \begin{figure}[H]
+            \centering
+            \subfigure[阈值0.5\%]
+            {
+                \includegraphics[width=0.22\textwidth]{harrs/result/thre05.png}
+            }
+            \subfigure[阈值1\%]
+            {
+                \includegraphics[width=0.22\textwidth]{harrs/result/thre1.png}
+            }
+            \subfigure[阈值2\%]
+            {
+                \includegraphics[width=0.22\textwidth]{harrs/result/thre2.png}
+            }
+            \subfigure[阈值3\%]
+            {
+                \includegraphics[width=0.22\textwidth]{harrs/result/thre3.png}
+            }
+            \caption{不同阈值提取结果}
+            \label{harristhrespic}
+        \end{figure}
+        \hspace{20pt}由于不同特征点计算得到\textit{R}值差异巨大，难以通过分层设色的方法观察。本节设置不同的百分比阈值，用以比较不同\textit{R}值点的区别。
+
+        \hspace{20pt}从提取结果上分析，\textit{R}值大的特征点主要是建筑物角点这样特征明显的角点，其次是单棵植被、单辆汽车这样的特征点。
+        而随着特征值的减小，越来越多的植被、汽车、道路特征点被提取出。因此本节认为，较好的特征点应该选取一个较大的阈值。
+    
+        \item 极大抑制窗口大小：
+        
+        \begin{figure}[H]
+            \centering
+            \subfigure[窗口大小10x10]
+            {
+                \includegraphics[width=0.22\textwidth]{harrs/result/local10.png}
+            }
+            \subfigure[窗口大小15x15]
+            {
+                \includegraphics[width=0.22\textwidth]{harrs/result/local15.png}
+            }
+            \subfigure[窗口大小20x20]
+            {
+                \includegraphics[width=0.22\textwidth]{harrs/result/local20.png}
+            }
+            \subfigure[窗口大小25x25]
+            {
+                \includegraphics[width=0.22\textwidth]{harrs/result/local25.png}
+            }
+            \subfigure[窗口大小30x30]
+            {
+                \includegraphics[width=0.22\textwidth]{harrs/result/local30.png}
+            }
+            \subfigure[窗口大小35x35]
+            {
+                \includegraphics[width=0.22\textwidth]{harrs/result/local35.png}
+            }
+            \subfigure[窗口大小40x40]
+            {
+                \includegraphics[width=0.22\textwidth]{harrs/result/local40.png}
+            }
+            \subfigure[窗口大小45x45]
+            {
+                \includegraphics[width=0.22\textwidth]{harrs/result/local45.png}
+            }
+            \caption{不同极大抑制窗口大小提取结果}
+            \label{harris_localsize}
+        \end{figure}
+
+        \hspace{20pt}从提取结果分析，随着极大抑制窗口的增大，得到的特征点逐步减少，且变化趋势逐渐放缓。减少的点主要为一些小地物
+        特征点，随着极大抑制窗口增大，这一部分特征点则被抑制。同时建筑物角点等则保留较为完好。
+
+        \begin{figure}[H]
+            \centering 
+            \includegraphics[width=0.8\textwidth]{harrs/result/localline.png}
+            \caption{不同极大抑制窗口大小提取结果变化趋势}
+            \label{harris_maxline}
+        \end{figure}
+
+    \end{enumerate}
+
+    \subsubsection{影像增强对于提取结果影响}
+    \begin{figure}[H]
+        \centering
+        \subfigure[原始影像]
+        {
+            \includegraphics[width=0.4\textwidth]{harrs/result/areial.png}
+        }
+        \subfigure[直方图均衡化]
+        {
+            \includegraphics[width=0.4\textwidth]{harrs/result/histequal.png}
+        }
+        \caption{影像增强提取结果}
+        \label{harris_enhance}
+    \end{figure}
+
+    从实验结果分析，直方图均衡化并未显著提高\textit{Harris}算子的提取能力，二者提取效果差异不大。直方图均衡化后，抑制了部分小地物特征点，
+    其余特征点并无差异。本节认为直方图均衡化对于\textit{Harris}算子之意义有限。
+
+    \subsubsection{影像变换对于提取结果的影响}
+    \begin{enumerate}
+        \item 缩放变换
+        
+        \hspace{20pt}本节中，实验影像的尺寸为$512 \times 512$。本节中将其缩小至$64 \times 64,128 \times 128,256 \times 256$,
+        亦将其插值放大至$1024 \times 1024,2048 \times 2048$，以探究其对提取结果之影响(图\ref{harris_scale})。
+
+        \hspace{20pt}从实验结果分析，\textit{Harris}算子对于缩放变换极其敏感。随着影像尺寸的缩小，\textit{Harris}算子提取
+        的特征点数目急剧减少。不过较为显著的特征点如建筑物角点等仍然可以提取出来。而随着影像尺寸插值放大，特征点数目显著提升。
+        而增加的特征点多是在平缓区域的不佳角点。观测其\textit{R}值可发现，随着尺寸增大，特征点\textit{R}值显著减小，由此导致特征点提取效果不佳。
+        放大效果变差可能是由于插值导致的边界灰度变化模糊，从而造成提取角点困难。若是原生的高分辨率影像，上述问题可能不会出现。
+
+
+        \begin{figure}[H]
+            \centering
+            \subfigure[缩小8倍]
+            {
+                \includegraphics[width=0.3\textwidth]{harrs/result/scale64.png}
+            }
+            \subfigure[缩小4倍]
+            {
+                \includegraphics[width=0.3\textwidth]{harrs/result/scale128.png}
+            }
+            \subfigure[缩小2倍]
+            {
+                \includegraphics[width=0.3\textwidth]{harrs/result/scale256.png}
+            }
+            \subfigure[原始尺寸]
+            {
+                \includegraphics[width=0.3\textwidth]{harrs/result/scale512.png}
+            }
+            \subfigure[放大2倍]
+            {
+                \includegraphics[width=0.3\textwidth]{harrs/result/scale1024.png}
+            }
+            \subfigure[放大4倍]
+            {
+                \includegraphics[width=0.3\textwidth]{harrs/result/scale2048.png}
+            }
+            \caption{不同缩放尺度提取结果}
+            \label{harris_scale}
+        \end{figure}
+    
+        \begin{figure}[H]
+            \centering
+            \subfigure[旋转5度]
+            {
+                \includegraphics[width=0.3\textwidth]{harrs/result/rotate5.png}
+            }
+            \subfigure[旋转10度]
+            {
+                \includegraphics[width=0.3\textwidth]{harrs/result/rotate10.png}
+            }
+            \subfigure[旋转15度]
+            {
+                \includegraphics[width=0.3\textwidth]{harrs/result/rotate15.png}
+            }
+            \subfigure[旋转30度]
+            {
+                \includegraphics[width=0.3\textwidth]{harrs/result/rotate30.png}
+            }
+            \subfigure[旋转45度]
+            {
+                \includegraphics[width=0.3\textwidth]{harrs/result/rotate45.png}
+            }
+            \subfigure[旋转60度]
+            {
+                \includegraphics[width=0.3\textwidth]{harrs/result/rotate60.png}
+            }
+            \caption{不同旋转角度大小提取结果}
+            \label{harris_rotate}
+        \end{figure}
+
+
+        \item 旋转变换
+        
+        \hspace{20pt}本节中，对实验影像分别进行了$5^\circ , 10^\circ , 15^\circ , 30^\circ , 45^\circ , 60^\circ$的逆时针旋转，
+        以分析旋转对于提取结果之影像(图\ref{harris_rotate})
+
+        \hspace{20pt}从实验结果分析，旋转变换并不会使\textit{Harris}算子丢失特征点。对比各区域主要特征点，如建筑物角点，单颗植被，单辆汽车等，均不存在大面积丢失的情况。
+        少部分特征点的增加主要位于边界区域，这一部分由于以0对影像填充，故造成领域内灰度差异变大。
+        因此可以认为\textit{Harris}算子具有角度不变性。而其具有该特性的原因在于其利用二元泰勒展开模拟各个方向的灰度差异(式\ref{harrisEuv})，而非如
+        \textit{Moravec}算子仅计算四个方向的灰度差异。
+
+    \end{enumerate}
+
+    \subsubsection{影像噪声对于提取结果的影响}
+
+    \begin{figure}[H]
+        \centering
+        \subfigure[原始影像]
+        {
+            \includegraphics[width=0.4\textwidth]{harrs/result/areial.png}
+        }
+        \subfigure[椒盐噪声]
+        {
+            \includegraphics[width=0.4\textwidth]{harrs/result/spnoise.png}
+        }
+        \subfigure[高斯噪声]
+        {
+            \includegraphics[width=0.4\textwidth]{harrs/result/gaussnoise.png}
+        }
+        \subfigure[随机噪声]
+        {
+            \includegraphics[width=0.4\textwidth]{harrs/result/randnoise.png}
+        }
+        \caption{添加不同噪声对提取影响}
+        \label{harris_noise}
+    \end{figure}
+
+    本节中，分别对实验影像添加了椒盐噪声，高斯噪声，随机噪声，以探究噪声对于提取结果的影响。
+
+    通过实验对比未加噪声的提取结果可以分析，噪声对于提取结果的影响不大。椒盐噪声造成\textit{Harris}算子在平坦区域提取到了少量
+    不佳特征点，高斯噪声则对\textit{Harris}算子影响较小，随机噪声造成\textit{Harris}算子丢失部分建筑物特征点。但影响的这部分
+    特征点仅占\textit{Harris}算子提取的特征点的小部分。因此可以认为\textit{Harris}算子具有一定的抗噪声能力。
+
+\subsection{小结}
+    本次实习通过编写程序实现\textit{Harris}算子，并针对其参数、影像波段、增强、变换、噪声等因素进行了实验，深刻了解了
+    \textit{Harris}算子的原理和适用条件，基本达到实现目的。

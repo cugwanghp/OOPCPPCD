@@ -1,0 +1,297 @@
+
+\section{特征提取：Hough变换}
+\subsection{简介}
+
+    \textit{Hough}变换是一种图像处理中的特征提取算法。其实质即将坐标空间中的点变换到参数空间中，通过统计参数空间中点的数目反推坐标空间中对应几何特征物。
+    常用的\textit{Hough}变换的特征检测有线特征检测、圆特征检测等。
+
+\subsection{原理}
+    \subsubsection{符号约定}
+        
+    \begin{table}[H]
+        \centering
+        \begin{tabular}{cl}
+            \toprule
+              符号  & 说明 \\
+            \midrule
+                $\rho$  & \textit{Hough}参数空间中的纵坐标，在\textit{XOY}坐标系中代表某点/线到原点的距离  \\
+                $\rho_0$  & 某一条直线在\textit{Hough}参数空间中的纵坐标  \\
+                $\alpha$  & \textit{Hough}参数空间中的横坐标，在\textit{XOY}坐标系中代表直线与纵轴夹角  \\
+                $\alpha_0$  & 某一条直线在\textit{Hough}参数空间中的横坐标  \\
+                $k$  & 在\textit{XOY}坐标系中直线的斜率  \\
+                $b$ & 在\textit{XOY}坐标系中直线的纵截距\\
+                $x_0$ & 某一点在\textit{XOY}坐标系中的横坐标 \\
+                $y_0$ & 某一点在\textit{XOY}坐标系中的纵坐标 \\
+            \bottomrule
+        \end{tabular}
+        \caption{符号约定}
+        \label{hough_symbol}
+    \end{table}
+
+    \subsubsection{基础概念}
+        \begin{theorem}{直线的斜截式方程}
+            在式中，\textit{k}表示直线斜率，其含义为直线与横坐标轴夹角的正切值；\textit{b}表示截距，其为直线与纵坐标轴的截距。
+            \begin{equation}
+                \label{line_kb}
+                y=kx+b
+            \end{equation}
+            而直线的斜截式方程无法表示垂直于横坐标轴的直线，同时接近于垂直横坐标轴的直线，其斜率极大，不易处理。
+        \end{theorem}
+
+        \begin{theorem}{直线的法线式方程}
+            在式中，$\rho$表示直线到原点的距离，$\alpha$表示直线与纵坐标的夹角。
+            \begin{equation}
+                \label{line_rho}
+                \rho = x cos\alpha+y sin\alpha
+            \end{equation}
+            该直线方程可以表示平面内任意一条直线。
+        \end{theorem}
+
+        \paragraph{转换}斜截式方程可以很轻易的转换为法线式方程。其中：
+        \begin{equation}
+            \label{kx2ra}
+            \left\{
+                \begin{aligned}
+                    \rho &= \frac{|b|}{\sqrt{k^2+1}} \\
+                    \alpha&= \frac{\pi}{2}-arctan(k)
+                \end{aligned}
+            \right.
+        \end{equation}
+
+    \subsubsection{算法原理}
+        \begin{enumerate}
+            \item Hough变换：
+            
+            \hspace{20pt}Hough变换即将原\textit{XOY}平面中的点变换到参数空间中。\textbf{参数空间}指直线参数之空间，其横纵坐标轴为式(\ref{line_rho})中的参数$\alpha, \rho$。之所以使用直线的法线式方程(式(\ref{line_rho}))而不使用
+                            直线的斜截式方程(式(\ref{line_kb}))，在于直线的法线式方程可以表示平面直角坐标系中所有的直线，而斜截式方程无法表示垂直于横坐标轴的直线。
+                \begin{itemize}
+                    \item \textbf{线变换：}该变换将原\textit{XOY}平面中的直线变换为\textit{Hough}参数空间中的一个点。
+
+                        \begin{equation}
+                            XOY: \ \rho_0 = x cos\theta_0+y sin\theta_0 \ \rightarrow \ Hough: \ (\theta_0,\rho_0)
+                        \end{equation}
+                    \item \textbf{点变换：}该变换将原\textit{XOY}平面中的点变换为\textit{Hough}参数空间中的一条正弦曲线。
+                    
+                    \begin{equation}
+                        XOY: \ (x_0,y_0) \ \rightarrow \ Hough: \ \rho = x_0 cos\theta+y_0 sin\theta
+                    \end{equation}
+                    
+                \end{itemize}
+
+            \hspace{20pt}由此，将原平面中所有的点根据方程(\ref{line_rho})变换至\textit{Hough}参数空间中。
+
+            \item 统计投票：
+            
+            \hspace{20pt} \textit{Hough}参数空间每一个点代表一条直线，而每一条正弦曲线则代表一个点。若\textit{Hough}参数空间中多条正弦曲线交于一点$P_{Hough}$，则该若干条曲线在\textit{XOY}平面中所代表的点均在$P_{Hough}$所代表的直线上。
+            因此仅需找到\textit{Hough}参数空间中多条正弦曲线的交点即可。统计相交次数，根据阈值筛选出符合条件的点。
+                        
+            \item 反变换：
+            
+            \hspace{20pt}将\textit{Hough}参数空间中上一步得到的点根据方程(\ref{line_rho})反变换到\textit{XOY}平面中。
+
+        \end{enumerate}
+
+    
+\subsection{程序编写}
+    \subsubsection{开发环境}
+        程序基于\textit{Python}语言编写，使用\textit{Pycharm}进行编写。程序中使用\textit{Opencv}库对影像进行读写，使用\textit{Numpy}库进行矩阵运算，使用\textit{Matplotlib}库进行结果可视化。
+    \subsubsection{算法流程}
+        \begin{enumerate}
+            \item [(1)]影像预处理：这一步包括将彩色影像转换为灰度影像，影像几何变换，影像加噪声等处理。
+            \item [(2)]边缘检测：对影像进行边缘检测以凸显线特征。
+            \item [(3)]二值化：\textit{Hough}变换要求输入影像为二值影像，对边缘检测算子计算后影像二值化。
+            \item [(4)]\textit{Hough}变换：对二值化后影像中的每一个非背景点，将其根据式(\ref{line_rho})变换至\textit{Hough}空间。
+                        程序进行\textit{Hough}时涉及离散采样操作。由\textit{XOY}空间通过式(\ref{line_rho})变换至\textit{Hough}空间时，原本的整型会变为浮点型。
+                        若欲统计相交点数，则需进行离散化的格网划分。离散化的对象为$\theta, \rho$。据此设计的参数为：
+                        \begin{itemize}
+                            \item 角度离散化参数(angle\_part)：该参数将$0-\pi$划分为angle\_part份，每一份的$\theta$将被认为是相等的。
+                            \item 距离离散化参数(rho\_res)：该参数将$0-\rho_{max}$划分为rho\_res份，每一份$\rho$将被认为是相等的。
+                            \item 投票阈值(thres)：该参数为步骤(5)之阈值。
+                        \end{itemize}
+
+            \item [(5)]投票统计：统计\textit{Hough}空间中每一个交点相交直线的数目，并根据阈值提取符合条件的交点。
+            \item [(6)]反\textit{Hough}变换：将(5)中得到的交点根据式(\ref{line_rho})反变换至\textit{XOY}平面。
+        \end{enumerate}
+
+        \begin{figure}[H]
+            \centering 
+            \includegraphics[width=\textwidth]{hough/stream.png}
+            \caption{流程图}
+            \label{hough_stream}
+        \end{figure}
+
+    \subsubsection{核心代码说明}
+        \begin{enumerate}
+            \item \textit{Hough}变换代码
+            
+            \begin{figure}[H]
+                \centering 
+                \includegraphics[width=0.8\textwidth]{hough/trans1.png}
+                \caption{变换代码}
+                \label{hough_transcode}
+            \end{figure}
+
+            其中$x,y$为二值化图像中每一个非背景点的坐标，$theta$为将$0-\rho_{max}$划分为rho\_res份产生的向量，不妨设
+            $\bm{X}=[x_1,x_2, \cdots, x_n], \bm{Y}=[y_1,y_2, \cdots , y_n],\bm{\theta} = [\theta_1,\theta_2, \cdots ,\theta_k]$，则上述代码表示
+            \begin{equation}
+                \label{calrho}
+                    \begin{aligned}
+                        \bm{\rho}&=\bm{X}^T \times cos\bm{\theta} + \bm{Y}^T \times sin\bm{\theta} \\
+                                &=\begin{bmatrix} x_1 cos\theta_1+y_1 sin\theta_1 & x_1 cos\theta_2+y_1 sin\theta_2 & \cdots & x_1 cos\theta_k+y_1 sin\theta_k \\  x_2 cos\theta_1+y_2 sin\theta_1 & x_2 cos\theta_2+y_2 sin\theta_2 & \cdots & x_2 cos\theta_k+y_2 sin\theta_k \\ \vdots & \vdots & \ddots &\vdots \\  x_n cos\theta_1+y_n sin\theta_1 & x_n cos\theta_2+y_n sin\theta_2 & \cdots & x_n cos\theta_k+y_n sin\theta_k  \end{bmatrix}\\
+                                &=\begin{bmatrix} \rho_1(\theta_1) & \rho_1(\theta_2) & \cdots & \rho_1(\theta_k) \\ \rho_2(\theta_1) & \rho_2(\theta_2) & \cdots & \rho_2(\theta_k) \\ \vdots & \vdots & \ddots &\vdots \\ \rho_n(\theta_1) & \rho_n(\theta_2) & \cdots & \rho_n(\theta_k) \\ \end{bmatrix}
+                    \end{aligned}
+            \end{equation}
+            其中：$\rho_i(\theta_j)$代表第i个点第j个角度的$\rho$，由此则将\textit{XOY}平面坐标转换为\textit{Hough}参数空间坐标。
+
+            \item 生成\textit{Hough}空间矩阵
+            
+            \begin{figure}[H]
+                \centering 
+                \includegraphics[width=0.8\textwidth]{hough/trans2mat.png}
+                \caption{生成矩阵代码}
+                \label{hough_mat}
+            \end{figure}
+
+            针对上一步(式(\ref{calrho}))得到的坐标值，将其映射到一个矩阵中计算交点位置。
+            该步骤首先创建一个空的0值矩阵，其长为angle\_part，宽为angle\_part。
+            遍历上一步得到的点坐标，找到其在矩阵中的位置，并将该位置处的值加1，直到所有点得到遍历。
+            若某一点为交点，则其在矩阵中的值大于1。根据阈值筛选处符合的交点，反变换至\textit{XOY}平面空间。
+
+
+        \end{enumerate}
+
+    \subsubsection{函数调用}
+        本次实习中，程序将\textit{Hough}变换封装为一个类。因此其调用首先需要申请一个类对象，
+        随后调用对象的\textit{HoughTrans()}函数，得到图像中符合条件的线之端点坐标。
+
+        在申请类对象时，需要输入两个参数：
+        \begin{itemize}
+            \item 影像：二值化后的影像，数据为\textit{Numpy}
+            \item \textit{Hough}变换参数：为一个字典，其定义如下：
+            \begin{itemize}
+                \item 角度离散化参数(angle\_part)：该参数将$0-\pi$划分为angle\_part份，每一份的$\theta$将被认为是相等的。
+                \item 距离离散化参数(rho\_res)：该参数将$0-\rho_{max}$划分为rho\_res份，每一份$\rho$将被认为是相等的。
+                \item 投票阈值(thres)：该参数为\textit{Hough}空间投票矩阵的阈值，只有大于阈值的交点才会输出其坐标。
+            \end{itemize}
+        \end{itemize}
+
+        最后使用\textit{Matplotlib}库绘制影像和检测到特直线，可视化结果。
+
+\subsection{结果分析}
+    \subsubsection{结果展示}
+    
+    \begin{figure}[H]
+        \centering
+        \subfigure[提取结果]
+        {
+            \includegraphics[width=0.6\textwidth]{hough/result/result.png}
+        }
+        \subfigure[Hough空间影像]
+        {
+            \label{houghmatpic}
+            \includegraphics[width=0.3\textwidth]{hough/result/houghmat.png}
+        }
+        \caption{提取结果}
+        \label{hough_result}
+    \end{figure}
+
+    由于其他实验影像线性特征并不明显，因此本实验仅使用其中一幅影像作为实验影像。
+
+    从实验结果分析，影像部分线特征基本被提取出，部分未提取出的直线可能是由于阈值设置的问题。图(\ref{houghmatpic})为原
+    影像变换到\textit{Hough}空间后的影像，纵轴为$\rho$,横轴为$\theta$，其像元值为该点相交的次数。
+
+    \subsubsection{参数对于提取结果的影像}
+
+    \begin{enumerate}
+        \item 角度$\theta$划分
+        
+        \begin{figure}[H]
+            \centering
+            \subfigure[划分为45份]
+            {
+                \includegraphics[width=0.22\textwidth]{hough/result/theta45.png}
+            }
+            \subfigure[划分为90份]
+            {
+                \includegraphics[width=0.22\textwidth]{hough/result/theta90.png}
+            }
+            \subfigure[划分为180份]
+            {
+                \includegraphics[width=0.22\textwidth]{hough/result/theta180.png}
+            }
+            \subfigure[划分为360份]
+            {
+                \includegraphics[width=0.22\textwidth]{hough/result/theta360.png}
+            }
+            \caption{提取结果}
+            \label{hough_thetapic}
+        \end{figure}
+
+        \hspace{20pt}角度$\theta$划分是指将角度$\pi$划分为\textit{k}份。理论上划分的越精细，探测到的直线越多。本节分别将角度$\pi$
+        划分为$45,90,180,360$份，分析结果。
+
+        \hspace{20pt}从实验结果上看，随着角度划分的份数越小，算法检测到的直线也越多。而当划分份数达到一定时，更细的划分也无法使新的直线探测被检测出。
+        此处推荐划分为$180$份即可。
+
+        \item 投票阈值
+        
+        \begin{figure}[H]
+            \centering
+            \subfigure[投票阈值70]
+            {
+                \label{hough_threspic70}
+                \includegraphics[width=0.22\textwidth]{hough/result/thres70.png}
+            }
+            \subfigure[投票阈值80]
+            {
+                \label{hough_threspic80}
+                \includegraphics[width=0.22\textwidth]{hough/result/thres80.png}
+            }
+            \subfigure[投票阈值90]
+            {
+                \includegraphics[width=0.22\textwidth]{hough/result/thres90.png}
+            }
+            \subfigure[投票阈值100]
+            {
+                \includegraphics[width=0.22\textwidth]{hough/result/thres100.png}
+            }
+            \caption{不同投票阈值提取结果}
+            \label{hough_threspic}
+        \end{figure}
+
+        \hspace{20pt}投票阈值是指在\textit{Hough}空间矩阵中，相交超过一定次数的值。其可以理解为在该条直线上经过了多少个像素点。本节
+        分别设置投票阈值为$70,80,90,100$，分析结果。
+
+        \hspace{20pt}从结果分析，随着投票阈值的增加，提取到的直线逐渐增多。但投票阈值过小则会导致一些不明显的直线被提取为直线。
+        如图(\ref{hough_threspic70},\ref{hough_threspic80})中的红色直线，其并不具备直线的特征，但其经过的点数达到了一定值亦被提取为直线。
+
+    \end{enumerate}
+
+    \subsubsection{不同差分算子对提取结果影响}
+    \begin{figure}[H]
+        \centering
+        \subfigure[Sobel算子]
+        {
+            \includegraphics[width=0.3\textwidth]{hough/result/sobel.png}
+        }
+        \subfigure[Laplacian算子]
+        {
+            \includegraphics[width=0.3\textwidth]{hough/result/lap.png}
+        }
+        \subfigure[Canny算子]
+        {
+            \includegraphics[width=0.3\textwidth]{hough/result/canny.png}
+        }
+        \caption{差分算子提取结果}
+        \label{hough_delta}
+    \end{figure}
+    \textit{Hough}变换仅接受二值图像。因此需要先通过差分算子提取边界以二值化。本节分别使用\textit{Sobel,Laplacian,Canny}三种
+    算子对原灰度影像二值化。
+
+    实验结果表明，效果最好而差分算子为\textit{Canny}算子，其边界完整，无较多其他杂物影响。其次为\textit{Laplacian}算子，其边界完整，
+    但其有较多纹理影响。当投票阈值较小时，这些纹理可能造成较多的线提取错误。效果最差为\textit{Sobel}算子，其错误线提取较多，
+    有较多噪声影响。因此本实验推荐使用\textit{Canny}算子作为线特征提取前的差分算子。
+
+\subsection{小结}
+    本次实习通过编写程序实现\textit{Hough}变换，并针对其参数和差分算子进行了实验，深刻了解了\textit{Hough}变换的原理和适用条件，
+    基本达到实习目的。

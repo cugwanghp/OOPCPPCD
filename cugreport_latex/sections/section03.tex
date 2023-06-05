@@ -1,0 +1,533 @@
+
+\section{特征提取：Moravec算子}
+\subsection{简介}
+    \textit{Moravec}算子是一种提取角点的算子。其本质上即通过滑动二值矩形窗口寻找灰度变化的局部极大值。本实习旨在通过编写程序实现\textit{Moravec}算子，提取灰度图像的角点，为后续影像匹配提供基础。
+\subsection{原理}
+    \subsubsection{符号约定}
+
+    \begin{table}[H]
+        \centering
+        \setlength{\tabcolsep}{15mm}{
+        \begin{tabular}{cl}
+            \toprule
+              符号  & 说明 \\
+            \midrule
+                $V$  & 影像窗口内之兴趣值  \\
+                $V_1$  & 影像窗口水平方向之兴趣值  \\
+                $V_2$  & 影像窗口正对角线方向之兴趣值  \\
+                $V_3$  & 影像窗口竖直方向之兴趣值  \\
+                $V_4$  & 影像窗口反对角线方向之兴趣值  \\
+                $g(x,y)$ & 影像第\textit{x}列，第\textit{y}行像元灰度值\\
+            \bottomrule
+        \end{tabular}}
+        \caption{符号约定}
+        \label{moravec_symbol}
+    \end{table}
+
+    \subsubsection{基础概念}
+        \begin{theorem}{兴趣值}
+            本兴趣值，即二个等维度向量对应元素之差的平方和。若有二个$n$维向量$\bm{A}=[a_1,a_2,\cdots,a_n],\bm{B}=[b_1,b_2,\cdots,b_n]$,则可定义二个向量之兴趣值
+            \begin{equation}
+                \label{interestvalue}
+                V= \sum_{i=0}^n (a_i-b_i)^2
+            \end{equation}
+            即
+            \begin{equation}
+                \label{interestvalue2}
+                V =\sum (\bm{A}-\bm{B})\odot (\bm{A}-\bm{B})
+            \end{equation}
+            其中 $\odot$ 表示二向量的\textit{Hadamard}积，即对应元素相乘。
+        \end{theorem}
+
+    \subsubsection{算法原理}
+        \begin{enumerate}
+            \item 计算兴趣值：
+            
+            \hspace{20pt} \textit{Moravec}算子即对影像选取一定大小的窗口，计算其四个方向上的兴趣值(式(\ref{moravec_calV1234}))。其计算方法为：
+            \begin{equation}
+                \label{moravec_calV1234}
+                \left\{
+                    \begin{aligned}
+                        V_1 &= \sum_{i=-k}^{k-1} (g(c+i,r)-g(c+i+1,r))^2 \\
+                        V_2 &= \sum_{i=-k}^{k-1} (g(c+i,r+i)-g(c+i+1,r+i+1))^2 \\
+                        V_3 &= \sum_{i=-k}^{k-1} (g(c,r+i)-g(c,r+i+1))^2 \\
+                        V_4 &= \sum_{i=-k}^{k-1} (g(c+i,r-i)-g(c+i+1,r-i-1))^2 \\
+                    \end{aligned}
+                \right.
+            \end{equation}
+
+            \begin{figure}[H]
+                \centering 
+                \includegraphics[width=\textwidth]{moravec/calV.png}
+                \caption{竖直方向兴趣值计算}
+                \label{calV_vertical}
+            \end{figure}
+
+            如图(\ref{calV_vertical})，其以$5\times 5$作为窗口大小，计算了竖直方向的兴趣值($V_3$,如式(\ref{moravec_calV1234})):将中心像元所在列的上四个像元构成向量$\bm{A}=[2,4,8,16]$，
+            将中心像元所在列下四个像元构成向量$\bm{B}=[4,8,16,32]$，求出差值向量$\bm{A}-\bm{B}=[-2,-4,-8,-16]$，再根据公式(\ref{interestvalue},\ref{interestvalue2})求得竖直方向的兴趣值：
+            \begin{equation}
+                V_3=(-2)^2+(-4)^2+(-8)^2+(-16)^2 = 340
+            \end{equation}
+            其他方向同理可得。
+
+            再选取四个方向的最小值(式(\ref{moravec_calV}))作为窗口中心像元的兴趣值。
+            \begin{equation}
+                \label{moravec_calV}
+                V= \min \{v_1,v_2,v_3,v_4\}
+            \end{equation}
+
+            通过移动窗口（移动步长为1），从而得到整幅影像各像元的兴趣值。值得注意的是，影像的边界像元会存在无法计算兴趣值的情况（像元窗口在边界处无值）。
+            而由于边界像元并不是理想的角点，因此这一部分在算法中被忽略。
+
+            \item 选取特征点：
+            
+            \hspace{20pt}针对求出的兴趣值矩阵，通过选取一定的阈值来提取特征点。阈值的选取方法主要有三种：
+                \begin{itemize}
+                    \item 特定值：直接给定一个经验值值作为阈值。
+                    \item 百分比：统计兴趣值矩阵，选取后$k\%$的值作为阈值。
+                    \item 均值：统计兴趣值矩阵，以整幅影像兴趣值的均值作为阈值。
+                \end{itemize}
+
+            \item 极大值抑制：
+            
+            \hspace{20pt}角点之提取，是为影像配备之准备。因此希望提取出来之特征点分布尽可能均匀。极大值抑制即使为了去除分布密集的点。
+            
+            \hspace{20pt}极大值抑制的原理即在影像中选取一定大小之窗口，在窗口内选取兴趣值最大的特征点并丢弃窗口内的其他特征点。窗口的移动步长为窗口的大小。
+            \begin{figure}[H]
+                \centering 
+                \includegraphics[width=0.8\textwidth]{moravec/max.png}
+                \caption{极大值抑制}
+                \label{maxpool}
+            \end{figure}
+
+        \end{enumerate}
+
+
+\subsection{程序编写}
+    \subsubsection{开发环境}
+        程序基于\textit{Python}语言编写，使用\textit{Pycharm}进行编写。程序中使用\textit{Opencv}库对影像进行读写，使用\textit{Numpy}库进行矩阵运算，使用\textit{Matplotlib}库进行结果可视化。
+    \subsubsection{算法流程}
+        \begin{enumerate}
+            \item [(1)]影像预处理：这一步包括将彩色影像转换为灰度影像，影像几何变换，影像加噪声等处理。
+            \item [(2)]计算各像元兴趣值：在影像中选取窗口，以一个像素为步长遍历。根据式(\ref{moravec_calV})计算该窗口的兴趣值。以此往复，直到影像内所有像素之特征值计算完成。
+            \item [(3)]计算阈值提取特征点：根据原理中的描述，阈值之选取有以下几种：
+                \begin{itemize}
+                    \item 特定值：直接根据用户设定的阈值选取。
+                    \item 均值：计算兴趣值之均值。
+                    \item 百分比：对得到的兴趣值进行排序，选取第$k\%$作为阈值。(如$95\%$)
+                \end{itemize}
+            \item [(4)]极大值抑制：选取一定窗口大小，对图像以一定步长进行遍历。对每一个窗口，若中心点为局部最大值则保留，反之则丢弃。
+            \item [(5)]输出影像。
+        \end{enumerate}
+
+        \begin{figure}[H]
+            \centering 
+            \includegraphics[width=\textwidth]{moravec/stream.png}
+            \caption{流程图}
+            \label{moravec_stream}
+        \end{figure}
+
+    \subsubsection{核心代码说明}
+        \begin{enumerate}
+            \item 计算兴趣值
+            
+            \begin{figure}[H]
+                \centering
+                \subfigure[计算某一个方向的兴趣值]
+                {
+                    \includegraphics[width=0.45\textwidth]{moravec/calVcode.png}
+                    \label{onedirectionV}
+                }
+                \subfigure[计算四个方向的兴趣值]
+                {
+                    \includegraphics[width=0.45\textwidth]{moravec/calallvcode.png}
+                    \label{onewindowV}
+                }
+                \caption{计算兴趣值}
+                \label{calVcode}
+            \end{figure}
+
+
+            \hspace{20pt}该段代码是用以计算某一方向特征值。如图(\ref{calV_vertical}),该函数是计算两个向量的兴趣值(如式(\ref{interestvalue2}))。
+            在其之前需要获取每一个方向的向量。由于\textit{Python}中循环速度较慢，因此需要采用矩阵操作。需要将窗口二维矩阵拉伸为一维向量，再根据索引获取相应的值。
+            而不同方向的向量其在窗口矩阵中的索引具有一定规律：记中心像元在一维向量中的位置为$c$,窗口宽度为$w$像元。
+            \begin{itemize}
+                \item 水平方向：起始位置$c-\frac{1}{2}w$,截止位置为$c+\frac{1}{2}w$,数目为$w$，索引间隔为1。
+                \item 垂直方向：起始位置为$0+\frac{1}{2}w$,截止位置为$w^2-1-\frac{1}{2}w$，索引间隔之差$w$。
+                \item 正对角线方向:起始位置为$0$，截止位置为$w^2-1$，索引间隔为$w$
+                \item 反对角线方向：起始位置为$w$,截止位置为$w^2-w-1$，索引间隔为$w$
+            \end{itemize}
+            由此获得了各个方向的向量。对于每一个方向的$w$维向量，取其$[0,w-2]$构成$\bm{A}$向量，取其$[1,w-1]$构成$\bm{B}$向量，根据式(\ref{interestvalue2})可以计算该方向的兴趣值，
+            在求取其最小值，则获得该窗口中心像元之兴趣值。
+
+            \item 计算整幅影像兴趣值
+            
+            \begin{figure}[H]
+                \centering 
+                \includegraphics[width=0.8\textwidth]{moravec/calallv.png}
+                \caption{遍历影像计算兴趣值}
+                \label{allwindowVcode}
+            \end{figure}
+
+            \hspace{20pt}该段代码遍历整幅影像，求取各像素点的兴趣值，并赋予一个新的空矩阵。如先前所述，边界点无法求取其获得完整的窗口，又由于边界点并非理想角点，因此直接舍弃边界点。
+            设影像的尺寸为$a \times b$,窗口大小为$w$，则循环为：在行处，由$int(\frac{1}{2}w)$到$a-int(\frac{1}{2}w)$；在列处，由$int(\frac{1}{2}w)$到$b-int(\frac{1}{2}w)$。
+
+            \item 极大值抑制
+            \begin{figure}[H]
+                \centering 
+                \includegraphics[width=0.8\textwidth]{moravec/maxpool.png}
+                \caption{极大值抑制}
+                \label{maxpoolcode}
+            \end{figure}
+
+            \hspace{20pt}该段代码是遍历整幅兴趣值影像，提取局部区域内兴趣值最大的特征点。由于影像尺寸并一定能被局部最大抑制窗口宽度整除，因此需要检查是否可以提取出相应窗口。
+            图(\ref{maxpoolcode})即使检查是否
+            可以完整提取局部最大窗口。若不能，则从当前位置提取至边界。
+
+            \hspace{20pt}后半段即寻找窗口内的最大值，并将其坐标记录下来。
+        \end{enumerate}
+
+    \subsubsection{函数调用}
+        在本次实习中，程序将\textit{Moravec}算子封装为一个类。因此其调用首先需要申请一个类对象，
+        随后调用对象的\textit{Moravec()}函数即可返回特征点的坐标以及其兴趣值。
+
+        在申请类对象时，需要输入两个参数：
+        \begin{itemize}
+            \item 影像：需要是灰度化后的影像，数据类型为\textit{Numpy}
+            \item \textit{Moravec}参数：为一个字典，其具体定义如下：
+            \begin{itemize}
+                \item 窗口尺寸(window\_size):计算兴趣点的窗口大小
+                \item 阈值选择模式(threshold\_mode):包括均值模式(mean),值模式(value),百分比模式(percent)
+                \item 阈值(threshold):当为均值模式下，其无效；当为值模式下，表示阈值的值；当为百分比模式下，为后百分之k
+                \item 窗口尺寸(local\_window):极大抑制的窗口大小
+            \end{itemize}
+
+        \end{itemize}
+
+        最后利用\textit{Matplotlib}绘制影像和散点图，即可得到结果。
+
+\subsection{结果分析}
+    \subsubsection{结果展示}
+        
+        \begin{figure}[H]
+            \centering
+            \subfigure[实验图1]
+            {
+                \includegraphics[width=0.4\textwidth]{moravec/result/area.png}
+            }
+            \subfigure[实验图2]
+            {
+                \includegraphics[width=0.4\textwidth]{moravec/result/f16.png}
+            }
+            \subfigure[实验图3]
+            {
+                \includegraphics[width=0.4\textwidth]{moravec/result/house.png}
+            }
+            \subfigure[实验图4]
+            {
+                \includegraphics[width=0.4\textwidth]{moravec/result/penta.png}
+            }
+            \caption{提取结果}
+            \label{moravec_result}
+        \end{figure}
+    
+        图(\ref{moravec_result})中的十字点为提取结果，不同颜色代表不同的兴趣值。兴趣值图例位于右侧。
+        可见不同影像其角点的兴趣值不同。同时亦可以看出，兴趣值高的地方不一定是理想的特征点，而仅仅可能是变化距离的地方。因此阈值的选择可能需要仔细考虑。
+    
+    \subsubsection{不同波段对于提取结果的影响}
+    \begin{figure}[H]
+        \centering
+        \subfigure[蓝波段]
+        {
+            \includegraphics[width=0.22\textwidth]{moravec/result/f16b.png}
+        }
+        \subfigure[绿波段]
+        {
+            \includegraphics[width=0.22\textwidth]{moravec/result/f16g.png}
+        }
+        \subfigure[红波段]
+        {
+            \includegraphics[width=0.22\textwidth]{moravec/result/f16r.png}
+        }
+        \subfigure[灰度]
+        {
+            \includegraphics[width=0.22\textwidth]{moravec/result/f16grey.png}
+        }
+        \caption{不同波段提取结果}
+        \label{f16rgbg}
+    \end{figure}
+
+    由于提供的两幅影像中，仅实验图2为明显的彩色影像，因此本实验针对实验图2的不同波段进行\textit{Moravec}角点提取。实验采用相同的参数设置，唯一的变量为影像的波段。
+    其中灰度波段是根据\textit{Opencv}的灰度读取方法将\textit{RGB}影像读取为灰度影像。其具体原理为：
+        \begin{equation}
+            \label{calgray}
+            I=R \times 0.299 + G \times 0.587 + B \times 0.114
+        \end{equation}
+
+    从结果图可以看出，不同波段前景与背景的灰度变化略有差异，由此导致特征角点提取有较大差异。
+        \begin{itemize}
+            \item 蓝波段：在背景山脊处仅提取少量角点，在机身处提取较多角点，在机翼处提取少量角点。
+            \item 绿波段：在背景和前景中均提取较多角点，其中机翼处提取角点较多。
+            \item 红波段：在背景中提取较多角点而在机身处仅提取少量角点，在机翼处完全失能。
+            \item 灰度波段：结果呈现上述三个波段提取角点的并集。
+        \end{itemize}    
+    从实验结果分析，使用灰度波段提取的角点效果最好。
+
+    \subsubsection{参数对于提取结果的影响}
+        \textit{Moravec}算子包含三个参数：(1)计算窗口大小(2)阈值大小(3)极大抑制窗口大小。
+        本节利用控制变量法探究上述三个参数对于提取结果的影响。由于兴趣值大小并不能严格反映特征点的好坏，因此本节仅定性探究
+        参数对于提取结果的影响。
+        \begin{enumerate}
+            \item 计算窗口对于提取结果的影响：
+            \begin{figure}[H]
+                \centering
+                \subfigure[窗口大小5x5]
+                {
+                    \includegraphics[width=0.22\textwidth]{moravec/result/winsize5.png}
+                }
+                \subfigure[窗口大小7x7]
+                {
+                    \includegraphics[width=0.22\textwidth]{moravec/result/winsize7.png}
+                }
+                \subfigure[窗口大小9x9]
+                {
+                    \includegraphics[width=0.22\textwidth]{moravec/result/winsize9.png}
+                }
+                \subfigure[窗口大小11x11]
+                {
+                    \includegraphics[width=0.22\textwidth]{moravec/result/winsize11.png}
+                }
+                \subfigure[窗口大小13x13]
+                {
+                    \includegraphics[width=0.22\textwidth]{moravec/result/winsize13.png}
+                }
+                \subfigure[窗口大小15x15]
+                {
+                    \includegraphics[width=0.22\textwidth]{moravec/result/winsize15.png}
+                }
+                \subfigure[窗口大小17x17]
+                {
+                    \includegraphics[width=0.22\textwidth]{moravec/result/winsize17.png}
+                }
+                \subfigure[窗口大小19x19]
+                {
+                    \includegraphics[width=0.22\textwidth]{moravec/result/winsize19.png}
+                }
+                \subfigure[变化趋势]
+                {
+                    \includegraphics[width=0.8\textwidth]{moravec/result/winsizeline.png}
+                }
+                \caption{不同计算窗口大小提取结果}
+                \label{moravec_winsize}
+            \end{figure}
+            \hspace{20pt} 从上述结果上分析，随着计算窗口变大，得到的特征点逐渐变多，但当计算窗口达到一定大小后，特征点点数增长趋势逐渐放缓，差异极小。
+            从提取结果来看，如果认为建筑物之角点为理想之角点，则在窗口大小为$9\times 9 $之时，绝大多数理想角点已被提取出。
+            其余随窗口大小增加的特征点多是一些较小的目标物角点。
+
+            \hspace{20pt} 因此本节实验认为，\textit{Moravec}提取算子计算窗口不宜过大，亦不可过小。过小则角点提取不完整，过大则会导致一些较小地物之角点被提取出。
+            
+
+            \item 阈值对于提取结果的影响：
+            \begin{figure}[H]
+                \centering
+                \subfigure[实验图1]
+                {
+                    \includegraphics[width=0.4\textwidth]{moravec/result/thres1.png}
+                }
+                \subfigure[实验图3]
+                {
+                    \includegraphics[width=0.4\textwidth]{moravec/result/thres3.png}
+                }
+                \caption{阈值分析}
+                \label{moravec_thres}
+            \end{figure}
+            \hspace{20pt} 图(\ref{moravec_thres})中之结果图各特征点已按其兴趣值设色。大多数建筑角点其兴趣值并不高。
+            反而一些看上去并不理想的特征点（非典型角点），其兴趣值较高。由此可以提出一种双阈值的改进：第一个阈值滤除较低的兴趣值点，
+            第二个阈值滤除过高的兴趣值点。
+
+            \item 抑制窗口对于提取结果的影响：
+            \begin{figure}[H]
+                \centering
+                \subfigure[窗口大小10x10]
+                {
+                    \includegraphics[width=0.22\textwidth]{moravec/result/max10.png}
+                }
+                \subfigure[窗口大小15x15]
+                {
+                    \includegraphics[width=0.22\textwidth]{moravec/result/max15.png}
+                }
+                \subfigure[窗口大小20x20]
+                {
+                    \includegraphics[width=0.22\textwidth]{moravec/result/max20.png}
+                }
+                \subfigure[窗口大小25x25]
+                {
+                    \includegraphics[width=0.22\textwidth]{moravec/result/max25.png}
+                }
+                \subfigure[窗口大小30x30]
+                {
+                    \includegraphics[width=0.22\textwidth]{moravec/result/max30.png}
+                }
+                \subfigure[窗口大小35x35]
+                {
+                    \includegraphics[width=0.22\textwidth]{moravec/result/max35.png}
+                }
+                \subfigure[窗口大小40x40]
+                {
+                    \includegraphics[width=0.22\textwidth]{moravec/result/max40.png}
+                }
+                \subfigure[窗口大小45x45]
+                {
+                    \includegraphics[width=0.22\textwidth]{moravec/result/max45.png}
+                }
+                \caption{不同极大抑制窗口大小提取结果}
+                \label{moravec_maxwinsize}
+            \end{figure}
+
+            \begin{figure}[H]
+                \centering 
+                \includegraphics[width=0.8\textwidth]{moravec/result/maxline.png}
+                \caption{不同极大抑制窗口大小提取结果变化趋势}
+                \label{moravec_maxline}
+            \end{figure}
+            \hspace{20pt}从图(\ref{moravec_maxline})亦可以看出随着极大抑制窗口的变大，特征点数目逐渐变小，特征点减小的数量也逐步放缓。
+            正如先前所述，较为理想的特征点可能并非兴趣值最大的点，因此可以看出随着极大抑制窗口的增大，建筑
+            角点反而出现减少的现象。而与此同时，一些细小地物的角点如单颗植被，单辆汽车并未被抑制。因此本节认为，
+            极大抑制窗口亦不可过大或过小。其需要逐步实验得到针对该影像的最佳参数。
+        \end{enumerate}
+    
+    \subsubsection{影像增强对于提取结果的影响}
+    \begin{figure}[H]
+        \centering
+        \subfigure[原图]
+        {
+            \includegraphics[width=0.4\textwidth]{moravec/result/enhance_raw.png}
+        }
+        \subfigure[直方图均衡化]
+        {
+            \includegraphics[width=0.4\textwidth]{moravec/result/enhance_equl.png}
+        }
+        \caption{影像增强检测图}
+        \label{moravec_enhance}
+    \end{figure}
+        
+    从影像上可以分析出，直方图均衡化使更多的角点被提取出，部分典型角点（建筑物角点）的兴趣值也得到了显著增大
+    。但同时在一些原本平缓的区域，也出现了一些噪声角点。
+    直方图均衡化可以凸显角点特征，但同时也带来了噪声等问题。这可能需要配合极大抑制参数进行调整。    
+
+    \subsubsection{影像变换对于提取结果的影响}
+        \begin{enumerate}
+            \item 缩放变换
+            
+            \hspace{20pt}本节中，实验影像的尺寸为$512 \times 512$。本节中将其缩小至$64 \times 64,128 \times 128,256 \times 256$,
+            亦将其插值放大至$1024 \times 1024,2048 \times 2048$，以探究其对提取结果之影响(图\ref{moravec_scale})。
+
+            \hspace{20pt}从实验结果分析，缩小和放大均会造成提取效果变差，且随放大、缩小倍数的增加，效果急剧变差。
+            缩小效果变差可能是由于随着分辨率降低，其角点轮廓逐渐模糊，从而导致提取角点困难。放大效果变差可能是由于
+            插值导致的边界灰度变化模糊，从而造成提取角点困难。若是原生的高分辨率影像，上述问题可能不会出现。
+
+            \begin{figure}[H]
+                \centering
+                \subfigure[缩小8倍]
+                {
+                    \includegraphics[width=0.3\textwidth]{moravec/result/scale64.png}
+                }
+                \subfigure[缩小4倍]
+                {
+                    \includegraphics[width=0.3\textwidth]{moravec/result/scale128.png}
+                }
+                \subfigure[缩小2倍]
+                {
+                    \includegraphics[width=0.3\textwidth]{moravec/result/scale256.png}
+                }
+                \subfigure[原始尺寸]
+                {
+                    \includegraphics[width=0.3\textwidth]{moravec/result/scale512.png}
+                }
+                \subfigure[放大2倍]
+                {
+                    \includegraphics[width=0.3\textwidth]{moravec/result/scale1024.png}
+                }
+                \subfigure[放大4倍]
+                {
+                    \includegraphics[width=0.3\textwidth]{moravec/result/scale2048.png}
+                }
+                \caption{不同旋转角度大小提取结果}
+                \label{moravec_scale}
+            \end{figure}
+    
+            \begin{figure}[H]
+                \centering
+                \subfigure[旋转5度]
+                {
+                    \includegraphics[width=0.3\textwidth]{moravec/result/rotate5.png}
+                }
+                \subfigure[旋转10度]
+                {
+                    \includegraphics[width=0.3\textwidth]{moravec/result/rotate10.png}
+                }
+                \subfigure[旋转15度]
+                {
+                    \includegraphics[width=0.3\textwidth]{moravec/result/rotate15.png}
+                }
+                \subfigure[旋转30度]
+                {
+                    \includegraphics[width=0.3\textwidth]{moravec/result/rotate30.png}
+                }
+                \subfigure[旋转45度]
+                {
+                    \includegraphics[width=0.3\textwidth]{moravec/result/rotate45.png}
+                }
+                \subfigure[旋转60度]
+                {
+                    \includegraphics[width=0.3\textwidth]{moravec/result/rotate60.png}
+                }
+                \caption{不同旋转角度大小提取结果}
+                \label{moravec_rotate}
+            \end{figure}
+
+            \item 旋转变换
+            
+            \hspace{20pt}本节中，对实验影像分别进行了$5^\circ , 10^\circ , 15^\circ , 30^\circ , 45^\circ , 60^\circ$的逆时针旋转，
+            以分析旋转对于提取结果之影像(图\ref{moravec_rotate})
+
+            \hspace{20pt}从结果上分析，旋转对于提取效果的影像较大。当旋转一定的小角度(如$5^\circ , 10^\circ$)，其尚能保留一定特征点，
+            而当旋转角度增大，出现特征点的大面积丢失，且提取出的特征点值相较为旋转前偏小。而一些典型的建筑物角点则保留较好，但其丢失仍然较为严重。
+            其原因可能在于\textit{Moravec}算子仅统计四个方向的特征值(式\ref{moravec_calV1234})。而随着影像旋转，同一个点四个方向的像元值发生变化，
+            由此导致该点的兴趣值发生变化。故\textit{Moravec}算子不具备旋转不变性。
+
+        \end{enumerate}
+
+
+    \subsubsection{影像噪声对于提取结果的影响}
+    \begin{figure}[H]
+        \centering
+        \subfigure[原始影像]
+        {
+            \includegraphics[width=0.4\textwidth]{moravec/result/enhance_raw.png}
+        }
+        \subfigure[椒盐噪声]
+        {
+            \includegraphics[width=0.4\textwidth]{moravec/result/spnoise.png}
+        }
+        \subfigure[高斯噪声]
+        {
+            \includegraphics[width=0.4\textwidth]{moravec/result/gaussnoise.png}
+        }
+        \subfigure[随机噪声]
+        {
+            \includegraphics[width=0.4\textwidth]{moravec/result/randnoise.png}
+        }
+        \caption{添加不同噪声对提取影响}
+        \label{moravec_noise}
+    \end{figure}
+
+    本节中，分别对实验影像添加了椒盐噪声，高斯噪声，随机噪声，以探究噪声对于提取结果的影响。
+
+    从结果分析，噪声对于提取结果的影响较大。尽管建筑物角点被提取出，但平坦区域仍然有大量特征点被提取出。这些噪声特征点会极大的影响
+    影像匹配的工作。从原理上分析，\textit{Moravec}算子无法避免噪声的影响，尤其是椒盐噪声和随机噪声。这些噪声点本身即是在各个方向灰度差异极大的点，
+    故\textit{Moravec}不具备抗噪声的能力。
+
+\subsection{小结}
+    本次实习通过编写程序实现\textit{Moravec}算子，并针对其参数、影像波段、增强、变换、噪声等因素进行了实验，深刻了解了
+    \textit{Moravec}算子的原理和适用条件，基本达到实现目的。

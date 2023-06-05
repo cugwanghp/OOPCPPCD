@@ -1,0 +1,136 @@
+\documentclass[a4paper,UTF8,12pt]{ctexart}
+%\usepackage{ctex}
+\usepackage{multicol}
+\usepackage[a4paper,left=3.17cm,right=3.17cm,top=2.54cm,bottom=2.54cm]{geometry}
+
+\usepackage{type1cm}
+\usepackage{fancyhdr}
+
+\usepackage{fontspec}
+\setmainfont{Times New Roman}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true, linkcolor=black }
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{subfigure}
+\usepackage{caption}
+\usepackage{float}
+\usepackage{bm}
+\usepackage{booktabs}
+\usepackage{makecell}
+\usepackage[most]{tcolorbox}
+
+\usepackage{listings}
+\usepackage{xcolor}
+
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+
+\lstset{frame=tb,
+  language=c++,
+  aboveskip=3mm,
+  belowskip=3mm,
+  showstringspaces=false,
+  columns=flexible,
+  basicstyle={\small\ttfamily},
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  keywordstyle=\color{blue},
+  commentstyle=\color{dkgreen},
+  stringstyle=\color{mauve},
+  breaklines=true,
+  breakatwhitespace=true,
+  tabsize=3
+}
+
+\numberwithin{equation}{section}
+\CTEXsetup[format={\Large\bfseries}]{section}
+\ctexset{section={format={\heiti \zihao{3}}},subsection={format={\heiti \zihao{4}}},subsubsection={format={\heiti \zihao{-4}}}}
+
+\definecolor{browna}{rgb}{0.76,0.72,0.65}
+\definecolor{brownb}{rgb}{0.71,0.69,0.65}
+\definecolor{themeblue}{rgb}{0.24,0.36,0.52}
+\definecolor{codeblue}{rgb}{0.35,0.52,0.76}
+
+\newtcbtheorem[no counter]{theorem}{公式}{
+  enhanced,
+  sharp corners,
+  attach boxed title to top left={
+    yshifttext=-1mm
+  },
+  colback=white,
+  colframe=themeblue,
+  fonttitle=\bfseries,
+  boxed title style={
+    sharp corners,
+    size=small,
+    colback=themeblue,
+    colframe=themeblue,
+  } 
+}{thm}
+
+\newtcbtheorem[no counter]{codebox}{代码}{
+  enhanced,
+  sharp corners,
+  attach boxed title to top left={
+    yshifttext=-1mm
+  },
+  colback=white,
+  colframe=codeblue,
+  fonttitle=\bfseries,
+  boxed title style={
+    sharp corners,
+    size=small,
+    colback=codeblue,
+    colframe=codeblue,
+  } 
+}{thm}
+
+% 下划线
+\makeatletter
+\newcommand\dlmu[2][4cm]{\hskip1pt\underline{\hb@xt@ #1{\hss#2\hss}}\hskip3pt}
+\makeatother
+
+\newcommand\coursename{计算机高级语言程序设计C++实习报告}
+\newcommand\studentid{20181003570}
+\newcommand\studentname{卢一鹏}
+\newcommand\advisor{王红平、董宇婷}
+\newcommand\semester{2022年春}
+
+\begin{document}
+
+\include{./sections/coverpage.tex}
+
+\newpage
+\thispagestyle{empty}
+
+\tableofcontents
+\thispagestyle{empty}
+
+% 各章内容
+\newpage
+\setcounter{page}{1}
+\include{./sections/section01.tex}
+
+\newpage
+\include{./sections/section02.tex}
+
+\newpage
+\include{./sections/section03.tex}
+
+\newpage
+\include{./sections/section04.tex}
+
+%\newpage
+%\include{./sections/section05.tex}   
+
+%\newpage
+%\include{./sections/section06.tex}
+
+%\newpage
+%\include{./sections/section07.tex}
+
+\include{./sections/section08.tex}
+
+\end{document}

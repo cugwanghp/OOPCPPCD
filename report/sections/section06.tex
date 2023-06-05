@@ -1,0 +1,216 @@
+\section{影像匹配：相关系数匹配}
+\subsection{简介}
+
+    摄影测量中常需要匹配两幅影像，以生成DEM/DOM等产品。匹配两幅影像，则需要若干对同名点。
+    人工选择同名点效率极其低下，自动匹配同名点的算法由此应运而生。本实习所采用的即使一种常用的同名点匹配算法。
+    其原理为通过人工选择或自动提取在左片获得特征点，并以得到的特征点为中心，开窗口从而获得一个匹配模板。
+    再在右片相同位置开一个更大的窗口，逐点与模板计算相关系数，选取相关系数最大的点作为配准点。
+\subsection{原理}
+    \subsubsection{基础概念}
+        \begin{theorem}{相关系数}{}
+            对于两个随机变量$X,Y$,其相关系数为
+            \begin{equation}
+                \label{cor_cof}
+                r=\frac{ \sum_{i=1}^n (X_i - \overline{X})(Y_i - \overline{Y}) }{ \sqrt{ \sum_{i=1}^n (X_i - \overline{X})^2 } \sqrt{ \sum_{i=1}^n (Y_i - \overline{Y})^2   } }
+            \end{equation}
+            其中：$\overline{X},\overline{Y}$为随机变量$X,Y$的数学期望。
+        \end{theorem}
+    \subsubsection{算法原理}
+        
+        \begin{figure}[H]
+            \centering 
+            \includegraphics[width=0.9\textwidth]{cor/cormatch.png}
+            \caption{相关系数匹配原理}
+            \label{cormatchpic}
+        \end{figure}
+        相关系数匹配的原理较为简单：针对左片的每一个特征点(如图，特征点坐标为$(b,a)$)，以特征点为中心构建一个$m \times m$的窗口，构成匹配模板。
+        再在右片相同区域(相同点坐标$(b,a)$)构建一个$n \times n$的窗口($n > m$)。针对右片窗口，选取每一个符合匹配模板大小的小窗口作为待匹配区域，
+        计算其与匹配模板的相关系数，并赋予该待匹配区域的中心像元。待计算完搜索区域内所有的点后，选取搜索区域内相关系数最大的点作为特征点的同名点。
+
+        矩阵间的相关系数计算与随机变量的相关系数计算并无区别。将匹配模板中的每一个像元值看作随机变量$X$，待匹配区域中的每一个像元值看作随机变量$Y$，
+        再根据式(\ref{cor_cof})计算可得。
+
+\subsection{程序编写}
+    \subsubsection{开发环境}
+        程序基于\textit{Python}语言编写，使用\textit{Pycharm}进行编写。程序中使用\textit{Opencv}库对影像进行读写，使用\textit{Numpy}库进行矩阵运算，使用\textit{Matplotlib}库进行结果可视化。
+    \subsubsection{算法流程}
+        \begin{enumerate}
+            \item [(1)]影像预处理：这一步包括将彩色影像转换为灰度影像，影像几何变换，影像加噪声等处理。
+            \item [(2)]特征点提取：这一步可人工提取特征点，亦可以通过\textit{Moravec}算子、\textit{Harris}算子提取特征点。
+            \item [(3)]相关系数匹配：根据上述原理，对每一个提取出的特征点进行相关系数匹配。若匹配点相关系数低于某个阈值，则舍弃该对同名点。
+            \item [(4)]反匹配：根据步骤(3)中得到的同名点，以右片的提取结果为特征点，利用相关系数匹配提取左片上的对应点。若匹配点低于某个阈值则舍去。
+            \item [(5)]检验：将步骤(4)中得到的匹配点与步骤(2)中得到的特征点进行对比，计算其偏差。若偏差超过一定值，则舍去该同名匹配点。
+        \end{enumerate}
+
+        \begin{figure}[H]
+            \centering 
+            \includegraphics[width=\textwidth]{cor/stream.png}
+            \caption{相关系数匹配流程}
+            \label{corstream}
+        \end{figure}
+
+    \subsubsection{核心代码说明}
+        \begin{enumerate}
+            \item 获取搜索区域
+            
+            \begin{figure}[H]
+                \centering 
+                \includegraphics[width=0.8\textwidth]{cor/rightpatchcode.png}
+                \caption{获取搜索区域}
+            \end{figure}
+
+            \hspace{20pt}本段代码从左片特征点坐标寻找到右片对于坐标，根据设置的参数，获取了右片搜索区域矩阵。
+            其中\textit{if}用于判断获取的矩阵是否越界。若越界则舍去该对点。该思路是基于边界点并非良好的匹配点。
+
+            \item 遍历搜索区域
+            
+            \begin{figure}[H]
+                \centering 
+                \includegraphics[width=0.8\textwidth]{cor/calcorcode.png}
+                \caption{遍历搜索区域}
+            \end{figure}
+
+            \hspace{20pt}本段代码以左片匹配模板为基准，在右片的搜索区域逐像素点计算其与模板的相关系数。
+
+            \item 坐标转换
+            
+            \begin{figure}[H]
+                \centering 
+                \includegraphics[width=0.8\textwidth]{cor/corditrans.png}
+                \caption{坐标转换}
+            \end{figure}
+
+            \hspace{20pt}本段代码找到相关系数最大的位置，并将该位置由搜索区域坐标系转换到全局影像坐标系。
+
+        \end{enumerate}
+
+
+    \subsubsection{函数调用}
+        本次实习中，程序将相关系数封装为一个类。因此调用首先需要申请一个类对象，随后调用对象的成员函数。该类中有两个成员函数，
+        一个是为\textit{SimplePosMatch()}，该函数返回通过相关系数匹配的特征点，其仅通过相关系数阈值滤除。另一个是
+        \textit{withdisfilter()}，该函数返回通过相关系数匹配的特征点，其不仅通过相关系数阈值滤除，还会通过反向检验，仅保留
+        偏离小于等于一个像素的同名点。
+
+        申请类对象时，需要输入三个参数：
+        \begin{itemize}
+            \item 影像：灰度影像
+            \item 特征点提取参数：左片的特征点通过自动特征点提取算法，需要输入相关参数
+            \item 相关系数匹配参数：为一个字典，其定义如下：
+            \begin{itemize}
+                \item 左片窗口大小(left\_window)：该参数确定左片模板窗口的大小。
+                \item 右片窗口大小(right\_window)：该参数确定右片搜索区域窗口大小。
+                \item 相关系数阈值(cor\_thres)：该参数确定相关系数阈值，相关系数低于改值的将被滤除。
+                \item 反检验阈值(dis\_thres)：该参数确定反检验二点距离阈值，若高于该阈值将被滤除。
+            \end{itemize}
+        \end{itemize}
+        
+        最后使用\textit{Matplotlib}库绘制影像和匹配的同名点，可视化结果。
+
+\subsection{结果分析}
+    \subsubsection{结果展示}
+    \begin{figure}[H]
+        \centering 
+        \includegraphics[width=0.9\textwidth]{cor/result/result.png}
+        \caption{匹配结果}
+    \end{figure}
+
+    上述结果通过反检验，仅保留了相关系数大于阈值$r>0.8$，且反检验像素漂移小于1个像元的同名点。
+    从匹配结果上看，同名点匹配良好，反检验像素无误差。
+
+    \subsubsection{左右窗口大小比例对提取结果的影响}
+    \begin{figure}[H]
+        \centering
+        \subfigure[1:2]
+        {
+            \includegraphics[width=0.48\textwidth]{cor/result/1_2.png}
+        }
+        \subfigure[1:3]
+        {
+            \includegraphics[width=0.48\textwidth]{cor/result/1_3.png}
+        }
+        \subfigure[1:4]
+        {
+            \includegraphics[width=0.48\textwidth]{cor/result/1_4.png}
+        }
+        \subfigure[1:5]
+        {
+            \includegraphics[width=0.48\textwidth]{cor/result/1_5.png}
+        }
+        \caption{不同比例提取结果}
+        \label{cormatch_ratio_result}
+    \end{figure}
+    \begin{figure}[H]
+        \centering 
+        \includegraphics[width=\textwidth]{cor/result/ratioline.png}
+        \caption{匹配结果趋势}
+        \label{cormatch_ratioline}
+    \end{figure}
+
+    本节探究左片匹配模板窗口与右片搜索窗口比例的关系。图(\ref{cormatch_ratioline})中
+    蓝色的折线表示未经反检验匹配得到的点数（即仅依靠阈值滤除），橙色的折线为反检验后留下
+    的同名点（依靠反检验像素漂移阈值滤除，此步保留的均为反检验无像素误差的同名点）。
+
+    从结果上分析，随着比例的变大，匹配到的有效同名点变多，反检验无像素漂移误差的同名点亦变多。
+    但比例达到一定值后，匹配到的同名点数量变化减小以至完全消失。与此同时算法处理时间
+    仍然线性增加。结合图(\ref{cormatch_ratio_result})
+    定性分析，可见图中点位匹配较好，几乎没有错误匹配的同名点。
+
+    当达到一定比例后特征点不再改变的原因可能在于\textit{Moravec}算子提取出来的可用于匹配的特征点
+    均已被匹配完成。如果对时间不敏感的话，本实验建议采用尽可能大的比例进行同名点匹配。
+
+    \subsubsection{左片窗口大小对提取结果影响}
+
+    \begin{figure}[H]
+        \centering 
+        \includegraphics[width=\textwidth]{cor/result/winsizeline.png}
+        \caption{匹配结果趋势}
+        \label{cormatch_matchline}
+    \end{figure}
+
+    本节探究左片匹配模板窗口大小对匹配结果的影响。图(\ref{cormatch_matchline})中
+    蓝色的折线表示未经反检验匹配得到的点数（即仅依靠阈值滤除），橙色的折线为反检验后留下
+    的同名点（依靠反检验像素漂移阈值滤除，此步保留的均为反检验无像素误差的同名点）。
+
+    从实验结果分析，随着左片匹配模板增大，匹配到的同名点呈现先升高，后减小的趋势。
+    其中未经过反检验的匹配点与经过反检验的匹配点的差值却逐渐减小。
+    而算法处理时间呈现线性增加。从图(\ref{cormatch_win_result})中定性分析，点位匹配较好，
+    几乎没有错误匹配点。
+
+    同名点匹配呈现先增加后减小的趋势，本实验认为其原因可能在于：若匹配模板过小，则像素点特征不明显，
+    由此造成了一定的匹配错误，从而被相关系数阈值和反检验滤除。随着匹配模板尺寸的增加，像素点特征
+    变的更加明显，从而使匹配的准确度提高。而随着匹配模板尺寸的进一步增加，右片待匹配区域与匹配模板
+    相似程度度量变得愈加困难，由此造成了相关系数偏低，从而被相关系数阈值滤除。
+
+    \begin{figure}[H]
+        \centering
+        \subfigure[匹配模板5x5]
+        {
+            \includegraphics[width=0.48\textwidth]{cor/result/win5.png}
+        }
+        \subfigure[匹配模板7x7]
+        {
+            \includegraphics[width=0.48\textwidth]{cor/result/win7.png}
+        }
+        \subfigure[匹配模板9x9]
+        {
+            \includegraphics[width=0.48\textwidth]{cor/result/win9.png}
+        }
+        \subfigure[匹配模板11x11]
+        {
+            \includegraphics[width=0.48\textwidth]{cor/result/win11.png}
+        }
+        \subfigure[匹配模板13x13]
+        {
+            \includegraphics[width=0.48\textwidth]{cor/result/win13.png}
+        }
+        \subfigure[匹配模板15x15]
+        {
+            \includegraphics[width=0.48\textwidth]{cor/result/win15.png}
+        }
+        \caption{不同匹配模板大小提取结果}
+        \label{cormatch_win_result}
+    \end{figure}
+
+\subsection{小结}
+    本次实习通过编写程序实现了同名点的相关系数匹配，并针对其参数左右匹配窗口比，匹配模板窗口大小等参数进行实验，
+    深入了解了相关系数匹配的原理和适用性，基本达到实习目的。 
