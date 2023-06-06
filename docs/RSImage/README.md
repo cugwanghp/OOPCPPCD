@@ -1,3 +1,11 @@
+<!--
+ * @Description: 
+ * @Version: 1.0
+ * @Author: Wang Hongping
+ * @Date: 2022-04-23 20:35:53
+ * @LastEditors: Wang Hongping
+ * @LastEditTime: 2023-06-06 10:03:12
+-->
 # 遥感图像处理程序
 ## 目录
 - [课设内容](#课设内容)
@@ -80,7 +88,8 @@ Qt的下载、安装、配置及使用
 ## 附录
 - [BSQ/BIL/BIP读写](./RSImageFormat.md) || [The Basic of Remote Sensing Image](../../refs/Basic_RS_Image.docx)
 - [遥感测试数据](../../data/rsimage.zip)
-- [遥感图像显示工具-FWTools](../../refs/OpenEV_Manual.pptx) [下载FWTools](http://home.gdal.org/fwtools/FWTools247.exe)
+- [遥感图像显示工具-FWTools简介](../../refs/OpenEV_Manual.pptx) [下载地址1](http://home.gdal.org/fwtools/FWTools247.exe)[下载地址2](http://fwtools.loskot.net/)[下载地址3](http://fwtools.maptools.org/)
+- [ENVI图像查看备用工具-Rese-GLIMPS](https://www.rese-apps.com/software/download/index.html)
 - [Qt配置](./QtSetup.md)
 - [The Basic of Remote Sensing Image](../../refs/Basic_RS_Image.docx)
 
